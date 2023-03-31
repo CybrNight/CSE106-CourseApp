@@ -4,6 +4,13 @@ from . import db
 
 main = Blueprint('main', __name__)
 
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    courseName = db.Column(db.String(100))
+    prof = db.Column(db.String(100))
+    time = db.Column(db.String(100))
+    enrolled = db.Column(db.Integer)
+    maxEnroll = db.Column(db.Integer)
 
 @main.route('/')
 def index():
@@ -27,7 +34,16 @@ def forbidden(e):
 def profile():
     return render_template('grades.html', name=current_user.name)
 
-@main.route('/gradetest')
+@main.route('/coursetest')
 @login_required
 def yourgrades():
     return render_template('yourcourse.html', name=current_user.name)
+
+@main.route('/coursetest' , methods=['GET'])
+def get_grades():
+    classes = Course.query.all()
+    output = []
+    for c in classes:
+        course_data = {'courseName': c.courseName, 'prof': c.prof, 'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.maxEnroll}
+        output.append(course_data)
+    return output

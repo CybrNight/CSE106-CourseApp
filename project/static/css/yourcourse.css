@@ -1,0 +1,7 @@
+table, th, td {
+    border: 1px solid black;
+    /* add padding in header cells*/
+    padding: 5px;
+    margin-left: auto;
+    margin-right: auto;
+  }

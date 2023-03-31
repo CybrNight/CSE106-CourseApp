@@ -1,6 +1,6 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from flask import redirect, url_for, request, session
+from flask import redirect, url_for, render_template, session
 from .models import User
 from . import db
 
@@ -16,4 +16,4 @@ class AdminView(ModelView):
 
     def inaccessible_callback(self, name, **kwargs):
         if not self.is_accessible():
-            return redirect(url_for('main.index', next=request.url))
+            return render_template("error/403.html"), 403

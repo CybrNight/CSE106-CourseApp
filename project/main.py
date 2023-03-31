@@ -13,10 +13,16 @@ def index():
 @main.app_errorhandler(404)
 def page_not_found(e):
     print(e)
-    return render_template('404.html'), 404
+    return render_template('error/404.html'), 404
+
+
+@main.app_errorhandler(403)
+def forbidden(e):
+    print(e)
+    return render_template('error/403.html'), 403
 
 
 @main.route('/profile')
 @login_required
 def profile():
-    return render_template('profile.html', name=current_user.name)
+    return render_template('grades.html', name=current_user.name)

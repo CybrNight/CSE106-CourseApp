@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_user
+from flask import Blueprint, session, render_template, redirect, url_for, request, flash
+from flask_login import login_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from . import db
@@ -36,7 +36,6 @@ def signup_post():
                     password=generate_password_hash(password, method='sha256'))
 
     # add the new user to the database
-    print("hello")
     db.session.add(new_user)
     db.session.commit()
 
@@ -59,11 +58,15 @@ def login_post():
         # if the user doesn't exist or password is wrong, reload the page
         return redirect(url_for('auth.login'))
 
-     # if the above check passes, then we know the user has the right credentials
+     # if the above check passes, then we know the user has the right
+     # credentials
     login_user(user, remember=remember)
-    return redirect(url_for('main.profile'))
+    session['user'] = user.name
+    return redirect(request.args.get('next') or url_for('main.profile'))
 
 
 @auth.route('/logout')
+@login_required
 def logout():
-    return 'Logout'
+    logout_user()
+    return redirect(url_for("main.index"))

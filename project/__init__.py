@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
@@ -19,6 +21,11 @@ def create_app():
     login_manager.init_app(app)
 
     from .models import User
+    from .admin import AdminView
+
+    admin = Admin(app, name="Dashboard", index_view=AdminView(
+        User, db.session, url='/admin', endpoint='admin'))
+    admin.add_view(ModelView(User, db.session))
 
     @login_manager.user_loader
     def load_user(user_id):

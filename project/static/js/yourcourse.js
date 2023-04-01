@@ -1,7 +1,7 @@
-const courseTable = document.getElementById('output');
+courseTable = document.getElementById('output');
 
 async function getTable() {
-    let response = await fetch("/coursetest", {
+    let response = await fetch("/getcourses", {
         method: "GET",
         headers: {
             'Accept': 'application/json',
@@ -29,11 +29,11 @@ async function getTable() {
             var addCell = row.insertCell();
 
             //Set the cell values to the name (key) and grade (json[key])
-            courseNameCell = json["courseName"]
-            profCell = json["prof"]
-            timeCell = json["time"]
-            studentsCell = json["enrolled"]/json["maxEnrolled"]
-            addCell = "<button type='button' class='btn btn-primary'>Add</button>"
+            courseNameCell.innerText = json["courseName"]
+            profCell.innerText = json["prof"]
+            timeCell.innerText = json["time"]
+            studentsCell.innerText = json["enrolled"] / json["maxEnrolled"]
+            addCell.innerHTML = "<button type='button' class='btn btn-primary'>Add</button>"
             console.log();
         });
     } else {

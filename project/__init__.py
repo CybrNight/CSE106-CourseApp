@@ -16,15 +16,15 @@ def create_app():
 
     db.init_app(app)
 
-    with app.app_context():
-        db.create_all()
-
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
     from .models import User, Course
     from .admin import AdminView
+
+    app.app_context().push()
+    db.create_all()
 
     admin = Admin(app, name="Dashboard", index_view=AdminView(
         User, db.session, url='/admin', endpoint='admin'))

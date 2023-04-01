@@ -3,7 +3,7 @@ from flask_login import UserMixin
 
 
 enrollment = db.Table("enrollment",
-                      db.Column("class_id", db.Integer,
+                      db.Column("user_id", db.Integer,
                                 db.ForeignKey('user.id')),
                       db.Column("course_id", db.Integer, db.ForeignKey('course.id')))
 
@@ -11,10 +11,9 @@ enrollment = db.Table("enrollment",
 class User(UserMixin, db.Model):
     # primary keys are required by SQLAlchemy
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, unique=True)
+    name = db.Column(db.String(1000))
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
     courses = db.relationship(
         'Course', secondary=enrollment, backref="courses")
 
@@ -26,4 +25,3 @@ class Course(db.Model):
     time = db.Column(db.String(100))
     enrolled = db.Column(db.Integer)
     max_enroll = db.Column(db.Integer)
-    class_id = db.Column(db.Integer, unique=True)

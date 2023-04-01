@@ -5,6 +5,7 @@ from .models import Course
 
 main = Blueprint('main', __name__)
 
+
 @main.route('/')
 def index():
     return render_template('index.html')
@@ -27,18 +28,20 @@ def forbidden(e):
 def profile():
     return render_template('grades.html', name=current_user.name)
 
+
 @main.route('/coursetest')
 @login_required
 def yourgrades():
     return render_template('yourcourse.html', name=current_user.name)
 
-@main.route('/getcourses' , methods=['GET'])
+@main.route('/coursetest' , methods=['GET'])
 @login_required
 def get_grades():
     classes = Course.query.all()
 
     output = []
     for c in classes:
-        course_data = {'courseName': c.course_name, 'prof': c.prof, 'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
+        course_data = {'courseName': c.course_name, 'prof': c.prof,
+                       'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
         output.append(course_data)
-    return output
+    return {}, 205

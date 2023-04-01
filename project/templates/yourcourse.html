@@ -1,12 +1,5 @@
-{% extends "base.html" %} {% block content %}
-<head>
-    <link rel= "stylesheet" href= "{{ url_for('static',filename='css/yourcourse.css') }}">
-    <script src="{{ url_for('static',filename='js/yourcourse.js') }}"> </script>
-  </head>
-<h1 class="title">Flask Login hi</h1>
-<h2 class="subtitle">Welcome, {{name}}</h2>
-</div>
-<hr class="rounded">
-<div id="output">
-</div>
+{% extends "base.html" %} {% block content %} {% block head %} {{ super() }}
+<script src="{{ url_for('static',filename='js/yourcourse.js') }}"></script>
+{% endblock %}
+<h1 class="title">Welcome, {{ name }}!</h1>
 {% endblock %}

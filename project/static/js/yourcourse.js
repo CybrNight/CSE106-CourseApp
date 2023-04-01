@@ -1,4 +1,4 @@
-const courseTable = document.getElementById('output');
+courseTable = document.getElementById('output');
 
 async function getTable() {
     let response = await fetch("/getcourses", {
@@ -32,7 +32,7 @@ async function getTable() {
             courseNameCell.innerText = json["courseName"]
             profCell.innerText = json["prof"]
             timeCell.innerText = json["time"]
-            studentsCell.innerText = json["enrolled"]/json["maxEnrolled"]
+            studentsCell.innerText = json["enrolled"] / json["maxEnrolled"]
             addCell.innerHTML = "<button type='button' class='btn btn-primary'>Add</button>"
             console.log();
         });

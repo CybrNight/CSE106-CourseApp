@@ -21,7 +21,7 @@ async function getTable() {
         Object.keys(json).forEach(function (key) {
 
             //Insert row and two cells
-            var row = This.gradesTable.insertRow();
+            var row = gradesTable.insertRow();
             var courseNameCell = row.insertCell();
             var profCell = row.insertCell();
             var timeCell = row.insertCell();

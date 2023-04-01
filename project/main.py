@@ -1,16 +1,9 @@
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from . import db
+from .models import Course
 
 main = Blueprint('main', __name__)
-
-class Course(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    courseName = db.Column(db.String(100))
-    prof = db.Column(db.String(100))
-    time = db.Column(db.String(100))
-    enrolled = db.Column(db.Integer)
-    maxEnroll = db.Column(db.Integer)
 
 @main.route('/')
 def index():
@@ -44,6 +37,6 @@ def get_grades():
     classes = Course.query.all()
     output = []
     for c in classes:
-        course_data = {'courseName': c.courseName, 'prof': c.prof, 'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.maxEnroll}
+        course_data = {'courseName': c.course_name, 'prof': c.prof, 'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
         output.append(course_data)
     return output

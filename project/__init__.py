@@ -44,7 +44,4 @@ def create_app():
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    from .grades import grades as grades_blueprint
-    app.register_blueprint(grades_blueprint)
-
     return app

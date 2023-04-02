@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, jsonify
 from flask_login import login_required, current_user
 from . import db
 from .models import Course
+import json
 
 main = Blueprint('main', __name__)
 
@@ -34,14 +35,15 @@ def profile():
 def yourgrades():
     return render_template('yourcourse.html', name=current_user.name)
 
-@main.route('/coursetest' , methods=['GET'])
-@login_required
+
+@main.route('/getcourses', methods=['GET'])
 def get_grades():
     classes = Course.query.all()
 
-    output = []
+    classList = []
     for c in classes:
-        course_data = {'courseName': c.course_name, 'prof': c.prof,
-                       'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
-        output.append(course_data)
-    return {}, 205
+        classJson = {'courseName': c.course_name, 'prof': c.prof,
+                     'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
+        classList.append(classJson)
+    print()
+    return jsonify(classList)

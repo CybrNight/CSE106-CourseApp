@@ -1,7 +1,21 @@
-table, th, td {
-    border: 1px solid black;
-    /* add padding in header cells*/
-    padding: 5px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+table,
+th,
+td {
+  border: 1px solid black;
+  /* add padding in header cells*/
+  padding: 5px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tableFixHead {
+  grid-column: 1 / -1;
+  overflow-y: auto; /* make the table scrollable if height is more than 200 px  */
+  height: 300px; /* gives an initial height of 200px to the table */
+  width: 500px;
+}
+.tableFixHead thead th {
+  position: sticky; /* make the table heads sticky */
+  top: 0px; /* table head will be placed from the top of the table and sticks to it */
+  color: white;
+}

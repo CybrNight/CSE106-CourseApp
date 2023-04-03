@@ -9,7 +9,10 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    if(current_user.is_authenticated):
+        return render_template('index.html', name=current_user.name)
+    else:
+        return render_template('index.html', name='Guest')
 
 
 @main.app_errorhandler(404)
@@ -30,10 +33,10 @@ def profile():
     return render_template('grades.html', name=current_user.name)
 
 
-@main.route('/courses')
+@main.route('/courses', methods=['GET'])
 @login_required
-def yourgrades():
-    return render_template('yourcourse.html', name=current_user.name)
+def courses():
+    return render_template('courses.html', name=current_user.name)
 
 
 @main.route('/getCourses', methods=['GET'])

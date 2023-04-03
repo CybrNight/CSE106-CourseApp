@@ -6,7 +6,7 @@ class CourseApp {
 
     async getTable() {
         const This = this;
-        let response = await fetch("/getcourses", {
+        let response = await fetch("/coursetest", {
             method: "GET"
         });
         if (response.ok) {
@@ -42,16 +42,15 @@ class CourseApp {
                 profCell.innerText = course.prof;
                 timeCell.innerText = course.time;
                 studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
-                if(course.enrolled < course.maxEnroll) {
+                if (course.enrolled < course.maxEnroll) {
                     addCell.innerHTML = "<button id=\"add-course\"><i class=\"fa-sharp fa-solid fa-plus\"></i></button>"
-                /*
-                } else if (alreadyEnrolled) {
-                    addCell.innerHTML = "<button id=\"remove-course\"<i class=\"fa-sharp fa-solid fa-minus\"></i></button>"
-                */
+                    /*
+                    } else if (alreadyEnrolled) {
+                        addCell.innerHTML = "<button id=\"remove-course\"<i class=\"fa-sharp fa-solid fa-minus\"></i></button>"
+                    */
                 } else {
-                    addCell.innerHTML = "<button id=\"add-course\" disabled>FULL</button>" 
+                    addCell.innerHTML = "<button id=\"add-course\" disabled>FULL</button>"
                 }
-                console.log();
             });
         } else {
             throw new InternalError(`${response.status}:${await response.text()}`);

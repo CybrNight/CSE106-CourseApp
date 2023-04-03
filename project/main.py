@@ -1,15 +1,18 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from . import db
 from .models import Course
-import json
+from flask import jsonify
 
 main = Blueprint('main', __name__)
 
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    if (current_user.is_authenticated):
+        return render_template('index.html', name=current_user.name)
+    else:
+        return render_template('index.html', name='Guest')
 
 
 @main.app_errorhandler(404)
@@ -30,20 +33,33 @@ def profile():
     return render_template('grades.html', name=current_user.name)
 
 
-@main.route('/coursetest')
+@main.route('/courses', methods=['GET'])
 @login_required
-def yourgrades():
-    return render_template('yourcourse.html', name=current_user.name)
+def courses():
+    return render_template('courses.html', name=current_user.name)
 
 
-@main.route('/getcourses', methods=['GET'])
+@main.route('/getCourses', methods=['GET'])
 @login_required
-def get_grades():
+def get_courses():
     classes = Course.query.all()
 
-    classList = []
+    output = []
     for c in classes:
-        classJson = {'courseName': c.course_name, 'prof': c.prof,
-                     'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
-        classList.append(classJson)
-    return jsonify(classList)
+        course_data = {'courseName': c.course_name, 'prof': c.prof,
+                       'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
+        output.append(course_data)
+    return jsonify(output)
+
+
+@main.route('/getEnrolled', methods=['GET'])
+@login_required
+def get_enrolled():
+    classes = Course.query.all()
+
+    output = []
+    for c in classes:
+        course_data = {'courseName': c.course_name, 'prof': c.prof,
+                       'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
+        output.append(course_data)
+    return jsonify(output)

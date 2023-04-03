@@ -36,9 +36,21 @@ def yourgrades():
     return render_template('yourcourse.html', name=current_user.name)
 
 
-@main.route('/coursetest', methods=['GET'])
+@main.route('/getCourses', methods=['GET'])
 @login_required
-def get_grades():
+def get_courses():
+    classes = Course.query.all()
+
+    output = []
+    for c in classes:
+        course_data = {'courseName': c.course_name, 'prof': c.prof,
+                       'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
+        output.append(course_data)
+    return jsonify(output)
+
+@main.route('/getEnrolled', methods=['GET'])
+@login_required
+def get_enrolled():
     classes = Course.query.all()
 
     output = []

@@ -14,7 +14,8 @@ table {
   font-family: sans-serif;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
   width: 90%;
-  background-color: #0a8e7b
+  background-color: #0a8e7b;
+  table-layout: fixed;
 }
 
 .tableFixHead {
@@ -32,12 +33,13 @@ table {
 
 tr {
   background-color: #4e9487;
-  color: white;
 }
 
 th, td {
   padding: 10px 15px;
   text-align: left;
+  height: 10px;
+  max-height: 10px;
 }
 
 tr {
@@ -86,6 +88,17 @@ tr:last-of-type {
 }
 
 #add-course {
+  background-color: #0aae95;
+  color: white;
+  width: 60px;
+  padding: 7px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+#remove-course {
   background-color: #0aae95;
   color: white;
   width: 60px;

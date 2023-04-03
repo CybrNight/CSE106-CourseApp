@@ -37,6 +37,7 @@ def yourgrades():
 
 
 @main.route('/getcourses', methods=['GET'])
+@login_required
 def get_grades():
     classes = Course.query.all()
 
@@ -45,5 +46,4 @@ def get_grades():
         classJson = {'courseName': c.course_name, 'prof': c.prof,
                      'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
         classList.append(classJson)
-    print()
     return jsonify(classList)

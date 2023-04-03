@@ -29,7 +29,7 @@ def profile():
     return render_template('grades.html', name=current_user.name)
 
 
-@main.route('/coursetest')
+@main.route('/courses')
 @login_required
 def yourgrades():
     return render_template('yourcourse.html', name=current_user.name)

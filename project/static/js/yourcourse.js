@@ -1,44 +1,95 @@
-courseTable = document.getElementById('output');
+class CourseApp {
 
-async function getTable() {
-    let response = await fetch("/getcourses", {
-        method: "GET",
-        headers: {
-            'Accept': 'application/json',
-        }
-    });
-    if (response.ok) {
-        //Get json payload
-        const json = await response.json();
+    constructor(courseTable) {
+        this.courseTable = courseTable
+    }
 
-        //Delete all rows in the grades view table
-        for (var i = 1; i < courseTable.rows.length;) {
-            console.log("Deleted row:" + courseTable.rows[i]);
-            courseTable.deleteRow(i);
-        }
-
-        //Add new rows to the table
-        Object.keys(json).forEach(function (key) {
-
-            //Insert row and two cells
-            var row = gradesTable.insertRow();
-            var courseNameCell = row.insertCell();
-            var profCell = row.insertCell();
-            var timeCell = row.insertCell();
-            var studentsCell = row.insertCell();
-            var addCell = row.insertCell();
-
-            //Set the cell values to the name (key) and grade (json[key])
-            courseNameCell.innerText = json["courseName"]
-            profCell.innerText = json["prof"]
-            timeCell.innerText = json["time"]
-            studentsCell.innerText = json["enrolled"] / json["maxEnrolled"]
-            addCell.innerHTML = "<button type='button' class='btn btn-primary'>Add</button>"
-            console.log();
+    async getTable() {
+        const This = this;
+        let response = await fetch("/getcourses", {
+            method: "GET"
         });
-    } else {
-        throw new InternalError(`${response.status}:${await response.text()}`);
+        if (response.ok) {
+            //Get json payload
+            const json = await response.json();
+
+
+
+            //Delete all rows in the grades view table
+            for (var i = 1; i < this.courseTable.rows.length;) {
+                console.log("Deleted row:" + this.courseTable.rows[i]);
+                this.courseTable.deleteRow(i);
+            }
+            for (var counter in json.counters) {
+                console.log(json.counters[counter].counter_name);
+            }
+
+            //Add new rows to the table
+            console.log(json)
+            Object.keys(json).forEach(key => {
+                const course = json[key];
+
+                //Insert row and two cells
+                var row = This.courseTable.insertRow();
+                var courseNameCell = row.insertCell();
+                var profCell = row.insertCell();
+                var timeCell = row.insertCell();
+                var studentsCell = row.insertCell();
+                var addCell = row.insertCell();
+
+                //Set the cell values to the name (key) and grade (json[key])
+                courseNameCell.innerText = course.courseName;
+                profCell.innerText = course.prof;
+                timeCell.innerText = course.time;
+                studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
+                if(course.enrolled < course.maxEnroll) {
+                    addCell.innerHTML = "<button id=\"add-course\"><i class=\"fa-sharp fa-solid fa-plus\"></i></button>"
+                /*
+                } else if (alreadyEnrolled) {
+                    addCell.innerHTML = "<button id=\"remove-course\"<i class=\"fa-sharp fa-solid fa-minus\"></i></button>"
+                */
+                } else {
+                    addCell.innerHTML = "<button id=\"add-course\" disabled>FULL</button>" 
+                }
+                console.log();
+            });
+        } else {
+            throw new InternalError(`${response.status}:${await response.text()}`);
+        }
     }
 }
+window.onload = function () {
+    const courseTable = document.getElementById('course-table');
+    console.log(courseTable === null)
 
-getTable();
+    c = new CourseApp(courseTable);
+
+
+    c.getTable().catch(error => {
+        console.log(error);
+    });
+}
+
+function courseTabs(event, tabAction) {
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(tabAction).style.display = "block";
+    event.currentTarget.className += " active";
+}
+
+
+
+

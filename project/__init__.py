@@ -28,7 +28,6 @@ def create_app():
 
     admin = Admin(app, name="Dashboard", index_view=AdminView(
         User, db.session, url='/admin', endpoint='admin'))
-    admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(Course, db.session))
 
     @login_manager.user_loader

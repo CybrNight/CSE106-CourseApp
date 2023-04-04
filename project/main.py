@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from . import db
 from .models import Course
@@ -46,8 +46,11 @@ def get_courses():
 
     output = []
     for c in classes:
+        in_class = False
+        if c in current_user.courses:
+            in_class = True
         course_data = {'courseName': c.course_name, 'prof': c.prof,
-                       'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
+                       'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll, "in_class": in_class}
         output.append(course_data)
     return jsonify(output)
 
@@ -55,11 +58,28 @@ def get_courses():
 @main.route('/getEnrolled', methods=['GET'])
 @login_required
 def get_enrolled():
-    classes = Course.query.all()
+    classes = current_user.courses
 
     output = []
     for c in classes:
         course_data = {'courseName': c.course_name, 'prof': c.prof,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
         output.append(course_data)
+    print(output)
     return jsonify(output)
+
+
+@main.route('/courses/add', methods=['POST'])
+@login_required
+def enroll_course():
+    data = request.json
+
+    c_name = data["courseName"]
+    course = Course.query.filter_by(course_name=c_name).first()
+
+    if course:
+        if course.enrolled < course.max_enroll and not course in current_user.courses:
+            course.enrolled += 1
+            current_user.courses.append(course)
+            db.session.commit()
+    return "Enrolled student in course", 200

@@ -36,7 +36,16 @@ def profile():
 @main.route('/courses', methods=['GET'])
 @login_required
 def courses():
-    return render_template('courses.html', name=current_user.name)
+    # should be if user.type == 'teacher' once implemented
+    if(current_user.name == 'Ammon Hepworth' or current_user.name == 'Ralph Jenkins'):
+        return render_template('teacher.html', name=current_user.name)
+    else:
+        return render_template('courses.html', name=current_user.name)
+
+@main.route('/courses/<course_name>', methods=['GET'])
+@login_required
+def course(course_name):
+    return render_template('courseGrades.html', name=current_user.name, course=course_name)
 
 
 @main.route('/getCourses', methods=['GET'])

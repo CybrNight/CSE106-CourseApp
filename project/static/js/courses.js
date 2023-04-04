@@ -43,13 +43,13 @@ class CourseApp {
                 timeCell.innerText = course.time;
                 studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
                 if (course.enrolled < course.maxEnroll) {
-                    addCell.innerHTML = "<button id=\"add-course\"><i class=\"fa-sharp fa-solid fa-plus\"></i></button>"
+                    addCell.innerHTML = "<button id=\"add-course\" onclick=\"addButton()\"><i class=\"fa-sharp fa-solid fa-plus\"></i></button>"
                     /*
                     } else if (alreadyEnrolled) {
                         addCell.innerHTML = "<button id=\"remove-course\"<i class=\"fa-sharp fa-solid fa-minus\"></i></button>"
                     */
                 } else {
-                    addCell.innerHTML = "<button id=\"add-course\" disabled>FULL</button>"
+                    addCell.innerHTML = "<button id=\"add-course\"disabled>FULL</button>"
                 }
             });
         } else {
@@ -95,20 +95,112 @@ class CourseApp {
                 profCell.innerText = course.prof;
                 timeCell.innerText = course.time;
                 studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
-                removeCell.innerHTML = "<button id=\"remove-course\"<i class=\"fa-sharp fa-solid fa-minus\"></i></button>"
+                removeCell.innerHTML = "<button id=\"remove-course\" onclick=\"removeButton()\"><i class=\"fa-sharp fa-solid fa-minus\"></i></button>"
             });
         } else {
             throw new InternalError(`${response.status}:${await response.text()}`);
         }
     }
+
+    async getTeacherTable() {
+        const This = this;
+        let response = await fetch("/getCourses", {
+            method: "GET"
+        });
+        if (response.ok) {
+            //Get json payload
+            const json = await response.json();
+
+
+
+            //Delete all rows in the grades view table
+            for (var i = 1; i < this.courseTable.rows.length;) {
+                console.log("Deleted row:" + this.courseTable.rows[i]);
+                this.courseTable.deleteRow(i);
+            }
+            for (var counter in json.counters) {
+                console.log(json.counters[counter].counter_name);
+            }
+
+            //Add new rows to the table
+            console.log(json)
+            Object.keys(json).forEach(key => {
+                const course = json[key];
+
+                //Insert row and two cells
+                //check if course.prof is the same as the logged in user
+                if(course.prof == username) {
+                    var row = This.courseTable.insertRow();
+                    var courseNameCell = row.insertCell();
+                    var profCell = row.insertCell();
+                    var timeCell = row.insertCell();
+                    var studentsCell = row.insertCell();
+
+                    //Set the cell values to the name (key) and grade (json[key])
+   
+                    // course button for courses/courseName
+                    courseNameCell.innerHTML = '<a href="/courses/' + course.courseName + '">' + course.courseName + '</a>';
+                    profCell.innerText = course.prof;
+                    timeCell.innerText = course.time;
+                    studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
+                }
+            });
+
+        } else {
+            throw new InternalError(`${response.status}:${await response.text()}`);
+        }
+    }
+
+    // async getGradesTable() {
+    //     const This = this;
+    //     let response = await fetch("/getGrades", {
+    //         method: "GET"
+    //     });
+    //     if (response.ok) {
+    //         //Get json payload
+    //         const json = await response.json();
+
+
+
+    //         //Delete all rows in the grades view table
+    //         for (var i = 1; i < this.courseTable.rows.length;) {
+    //             console.log("Deleted row:" + this.courseTable.rows[i]);
+    //             this.courseTable.deleteRow(i);
+    //         }
+    //         for (var counter in json.counters) {
+    //             console.log(json.counters[counter].counter_name);
+    //         }
+
+    //         //Add new rows to the table
+    //         console.log(json)
+    //         Object.keys(json).forEach(key => {
+    //             const course = json[key];
+
+    //             //Insert row and two cells
+    //                 var row = This.courseTable.insertRow();
+    //                 var studentCell = row.insertCell();
+    //                 var gradeCell = row.insertCell();
+
+    //                 //Set the cell values to the name (key) and grade (json[key])
+    //                 studentCell = student.name;
+    //                 gradeCell = student.grade;
+    //         });
+    //     } else {
+    //         throw new InternalError(`${response.status}:${await response.text()}`);
+    //     }
+    // }
 }
 window.onload = function () {
     const courseTable = document.getElementById('course-table');
     const enrolledTable = document.getElementById('enrolled-table');
+    const teacherTable = document.getElementById('teacher-table');
+    const gradesTable = document.getElementById('grades-table');
     console.log(courseTable === null)
 
     c = new CourseApp(courseTable);
     c1 = new CourseApp(enrolledTable);
+    c2 = new CourseApp(teacherTable);
+    c3 = new CourseApp(gradesTable);
 
     c.getCourseTable().catch(error => {
         console.log(error);
@@ -117,6 +209,14 @@ window.onload = function () {
     c1.getEnrolledTable().catch(error => {
         console.log(error);
     });
+
+    c2.getTeacherTable().catch(error => {
+        console.log(error);
+    });
+
+    // c3.getGradesTable().catch(error => {
+    //     console.log(error);
+    // });
 }
 
 function courseTabs(event, tabAction) {
@@ -139,6 +239,16 @@ function courseTabs(event, tabAction) {
     event.currentTarget.className += " active";
 }
 
+function goBack() {
+    window.location.href = "/courses";
+}
 
+function addButton() {
+    // window.location.href = "/courses/" + courseName + "/add";
+}
+
+function removeButton() {
+    // window.location.href = "/courses/" + courseName + "/remove";
+}
 
 

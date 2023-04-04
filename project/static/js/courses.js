@@ -29,7 +29,7 @@ class CourseApp {
 
             //Add new rows to the table
             console.log(json)
-            Object.keys(json).forEach(key => {
+            Object.keys(json).forEach(async key => {
                 const course = json[key];
 
                 //Insert row and two cells
@@ -45,18 +45,19 @@ class CourseApp {
                 profCell.innerText = course.prof;
                 timeCell.innerText = course.time;
                 studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
-                var btn = document.createElement('input');
-                btn.type = "button";
-                btn.className = "fa-sharp fa-solid fa-plus";
-                btn.value = "<i class=\"fa-sharp fa-solid fa-plus\"></i>"
-                btn.onclick = await this.enrollClass(course.courseName);
+                var btn = document.createElement('button');
+                btn.onmouseup = async () => {
+                    await this.enrollClass(course.courseName);
+                };
                 if (course.enrolled < course.maxEnroll) {
+                    btn.className = "fa-sharp fa-solid fa-plus";
                     addCell.appendChild(btn);
                     /*
                     } else if (alreadyEnrolled) {
                         addCell.innerHTML = "<button id=\"remove-course\"<i class=\"fa-sharp fa-solid fa-minus\"></i></button>"
                     */
                 } else {
+                    btn.value = "disabled>FULL";
                     addCell.innerHTML = "<button id=\"add-course\" disabled>FULL</button>"
                 }
             });
@@ -243,4 +244,5 @@ function addButton() {
     // window.location.href = "/courses/" + courseName + "/add";
 }
 
-
+console.log("Gello")
+alert("Gello")

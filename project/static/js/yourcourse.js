@@ -45,8 +45,13 @@ class CourseApp {
                 profCell.innerText = course.prof;
                 timeCell.innerText = course.time;
                 studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
+                var btn = document.createElement('input');
+                btn.type = "button";
+                btn.className = "fa-sharp fa-solid fa-plus";
+                btn.value = "<i class=\"fa-sharp fa-solid fa-plus\"></i>"
+                btn.onclick = await this.enrollClass(course.courseName);
                 if (course.enrolled < course.maxEnroll) {
-                    addCell.innerHTML = "<button id=\"add-course\"><i class=\"fa-sharp fa-solid fa-plus\"></i></button>"
+                    addCell.appendChild(btn);
                     /*
                     } else if (alreadyEnrolled) {
                         addCell.innerHTML = "<button id=\"remove-course\"<i class=\"fa-sharp fa-solid fa-minus\"></i></button>"
@@ -98,6 +103,7 @@ class CourseApp {
                 profCell.innerText = course.prof;
                 timeCell.innerText = course.time;
                 studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
+
                 removeCell.innerHTML = `<button id=\"remove-course\" onclick=\"enrollClass(${course.courseName})\"><i class=\"fa-sharp fa-solid fa-minus\"></i></button>`
             });
         } else {
@@ -202,16 +208,9 @@ window.onload = function () {
     const enrolledTable = document.getElementById('enrolled-table');
     console.log(courseTable === null)
 
-    c = new CourseApp(courseTable);
-    c1 = new CourseApp(enrolledTable);
-    c2 = new CourseApp(teacherTable);
-    c3 = new CourseApp(gradesTable);
+    c = new CourseApp(courseTable, enrolledTable);
 
     c.getCourseTable().catch(error => {
-        console.log(error);
-    });
-
-    c1.getEnrolledTable().catch(error => {
         console.log(error);
     });
 }

@@ -13,8 +13,7 @@ def index():
     if (current_user.is_authenticated):
         return render_template('index.html', name=current_user.name)
     else:
-        session['name'] = "GUEST"
-        session['user'] = "GUEST"
+
         return render_template('index.html')
 
 
@@ -38,7 +37,6 @@ def courses():
         return render_template('teacher.html')
     elif current_user.role == Role.STUDENT:
         return render_template('courses.html')
-    print(session["role"])
     return render_template('index.html')
 
 

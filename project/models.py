@@ -3,7 +3,7 @@ from flask_login import UserMixin
 
 
 enrollment = db.Table("enrollment",
-                      db.Column("class_id", db.Integer,
+                      db.Column("user_id", db.Integer,
                                 db.ForeignKey('user.id')),
                       db.Column("course_id", db.Integer, db.ForeignKey('course.id')))
 

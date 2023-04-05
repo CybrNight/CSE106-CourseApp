@@ -57,14 +57,17 @@ class CourseApp {
                         addCell.appendChild(btn);
                     } else {
                         btn.className = "fa-sharp fa-solid";
-                        btn.innerText = "ENROLLED"
-                        btn.disabled = true
+                        btn.innerText = "ENROLLED";
+                        btn.disabled = true;
                         addCell.appendChild(btn);
                     }
                 } else {
                     btn.className = "fa-sharp fa-solid";
-                    btn.innerText = "FULL"
-                    btn.disabled = true
+                    if (!in_class)
+                        btn.innerText = "FULL";
+                    else
+                        btn.innerText = "ENROLLED";
+                    btn.disabled = true;
                     addCell.appendChild(btn);
                 }
             });

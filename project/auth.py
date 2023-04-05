@@ -1,5 +1,6 @@
 from flask import Blueprint, session, render_template, redirect, url_for, request, flash
 from flask_login import login_user, login_required, logout_user
+from flask import make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from . import db
@@ -30,11 +31,10 @@ def login():
         # credentials
         login_user(user, remember=remember)
         session['user'] = user.name
-        if user.name == "Administrator":
-            # redirect to http://127.0.0.1:5000/admin/
-            return redirect(url_for('main.index'))
-        else:
-            return redirect(request.args.get('next') or url_for('main.courses'))
+        resp = make_response(render_template("index.html"))
+        print(user.name)
+        resp.set_cookie("username", user.name)
+        return resp
 
 
 @auth.route('/signup', methods=['GET', 'POST'])
@@ -62,7 +62,7 @@ def signup():
         db.session.add(new_user)
         db.session.commit()
 
-        return redirect(url_for('auth.login'))
+        return redirect()
 
 
 @auth.route('/logout')

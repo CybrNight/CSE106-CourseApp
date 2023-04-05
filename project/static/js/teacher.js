@@ -32,7 +32,9 @@ class CourseApp {
 
                 //Insert row and two cells
                 //check if course.prof is the same as the logged in user
-                if (course.prof == username) {
+                const prof = getCookie("username");
+                console.log(prof);
+                if (course.prof == prof) {
                     console.log('hello');
                     var row = This.teacherTable.insertRow();
                     var courseNameCell = row.insertCell();
@@ -109,6 +111,10 @@ window.onload = function () {
     //     console.log(error);
     // });
 }
+
+const getCookie = (name) => (
+    (document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || '').replaceAll('"', "")
+)
 
 function courseTabs(event, tabAction) {
     var i, tabcontent, tablinks;

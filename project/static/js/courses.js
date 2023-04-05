@@ -145,7 +145,7 @@ class CourseApp {
     }
 
     async removeCourse(courseName) {
-        let response = await fetch(`/courses/remove/${courseName.replace(" ", "%20")}`, {
+        let response = await fetch(`/courses/remove/${courseName.replaceAll(" ", "%20")}`, {
             method: "DELETE",
             body: JSON.stringify({ "courseName": courseName })
         });

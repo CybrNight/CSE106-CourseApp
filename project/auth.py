@@ -30,7 +30,7 @@ def login():
         # credentials
         login_user(user, remember=remember)
         session['user'] = user.name
-        return redirect(request.args.get('next') or url_for('main.profile'))
+        return redirect(request.args.get('next') or url_for('main.courses'))
 
 
 @auth.route('/signup', methods=['GET', 'POST'])

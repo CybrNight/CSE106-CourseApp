@@ -6,7 +6,7 @@
 />
 <link
   rel="stylesheet"
-  href="{{ url_for('static', filename='css/courses.css') }}"
+  href="{{ url_for('static', filename='css/yourcourse.css') }}"
 />
 <link
   rel="stylesheet"

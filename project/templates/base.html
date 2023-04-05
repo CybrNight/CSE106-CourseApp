@@ -29,8 +29,8 @@
                   Home
                 </a>
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('main.profile') }}" class="navbar-item">
-                  Profile
+                <a href="{{ url_for('main.courses') }}" class="navbar-item">
+                  Courses
                 </a>
                 {% endif %} {% if current_user.name == "Administrator" %}
                 <a href="/admin" class="navbar-item"> Admin </a>

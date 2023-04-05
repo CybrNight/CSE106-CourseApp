@@ -30,7 +30,11 @@ def login():
         # credentials
         login_user(user, remember=remember)
         session['user'] = user.name
-        return redirect(request.args.get('next') or url_for('main.courses'))
+        if user.name == "Administrator":
+            # redirect to http://127.0.0.1:5000/admin/
+            return redirect(url_for('main.index'))
+        else:
+            return redirect(request.args.get('next') or url_for('main.courses'))
 
 
 @auth.route('/signup', methods=['GET', 'POST'])

@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from . import db
 import uuid
+from functools import wraps
 
 auth = Blueprint('auth', __name__)
 
@@ -31,10 +32,7 @@ def login():
         # if the above check passes, then we know the user has the right
         # credentials
         login_user(user, remember=remember)
-        session['user'] = user.name
-        session['role'] = user.role.value
         resp = make_response(render_template("index.html"))
-        print(user.role.value)
         resp.set_cookie("username", user.name)
         return resp
 

@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session
 from flask_login import login_required, current_user
 from . import db
 from .models import Course
+from .role import role_required, Role
 from flask import jsonify
 
 main = Blueprint('main', __name__)
@@ -12,7 +13,9 @@ def index():
     if (current_user.is_authenticated):
         return render_template('index.html', name=current_user.name)
     else:
-        return render_template('index.html', name='Guest')
+        session['name'] = "GUEST"
+        session['user'] = "GUEST"
+        return render_template('index.html')
 
 
 @main.app_errorhandler(404)
@@ -31,14 +34,17 @@ def forbidden(e):
 @login_required
 def courses():
     # should be if user.type == 'teacher' once implemented
-    if (current_user.name == 'Ammon Hepworth' or current_user.name == 'Ralph Jenkins'):
-        return render_template('teacher.html', name=current_user.name)
-    else:
-        return render_template('courses.html', name=current_user.name)
+    if current_user.role == Role.PROFESSOR:
+        return render_template('teacher.html')
+    elif current_user.role == Role.STUDENT:
+        return render_template('courses.html')
+    print(session["role"])
+    return render_template('index.html')
 
 
 @main.route('/courses/<course_name>', methods=['GET'])
 @login_required
+@role_required(role=Role.PROFESSOR)
 def course(course_name):
     return render_template('courseGrades.html', name=current_user.name, course=course_name)
 

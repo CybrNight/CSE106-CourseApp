@@ -32,9 +32,8 @@ class CourseApp {
 
                 //Insert row and two cells
                 //check if course.prof is the same as the logged in user
-                const prof = getCookie("username");
-                console.log(prof);
-                if (course.prof == prof) {
+                console.log(username)
+                if (course.prof == username) {
                     console.log('hello');
                     var row = This.teacherTable.insertRow();
                     var courseNameCell = row.insertCell();

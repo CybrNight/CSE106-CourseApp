@@ -4,17 +4,12 @@ from enum import Enum
 from sqlalchemy import event
 from werkzeug.security import generate_password_hash
 import uuid
+from .role import Role
 
 enrollment = db.Table("enrollment",
                       db.Column("user_id", db.Integer,
                                 db.ForeignKey('user.id')),
                       db.Column("course_id", db.Integer, db.ForeignKey('course.id')))
-
-
-class UserRole(Enum):
-    STUDENT = "STUDENT"
-    PROFESSOR = "PROFESSOR"
-    ADMIN = "ADMIN"
 
 
 class User(UserMixin, db.Model):
@@ -24,7 +19,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000))
     user_id = db.Column(db.String, unique=True)
-    role = db.Column(db.Enum(UserRole))
+    role = db.Column(db.Enum(Role))
     courses = db.relationship(
         'Course', secondary=enrollment, backref="courses")
 
@@ -37,13 +32,6 @@ class Course(db.Model):
     time = db.Column(db.String(100))
     enrolled = db.Column(db.Integer)
     max_enroll = db.Column(db.Integer)
-
-
-@event.listens_for(User.password, 'set', retval=True)
-def hash_user_password(target, value, oldvalue, initiator):
-    if value != oldvalue:
-        return generate_password_hash(value)
-    return value
 
 
 @event.listens_for(User.user_id, 'set', retval=True)

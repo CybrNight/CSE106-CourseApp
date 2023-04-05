@@ -48,14 +48,23 @@ class CourseApp {
                 const in_class = course.in_class;
 
                 const btn = document.createElement('button');
-                if (course.enrolled < course.maxEnroll && !in_class) {
-                    btn.onmouseup = async () => {
-                        await this.enrollClass(btn, course.courseName);
-                    };
-                    btn.className = "fa-sharp fa-solid fa-plus";
-                    addCell.appendChild(btn);
+                if (course.enrolled < course.maxEnroll) {
+                    if (!in_class) {
+                        btn.onmouseup = async () => {
+                            await this.addCourse(course.courseName);
+                        };
+                        btn.className = "fa-sharp fa-solid fa-plus";
+                        addCell.appendChild(btn);
+                    } else {
+                        btn.className = "fa-sharp fa-solid";
+                        btn.innerText = "ENROLLED"
+                        btn.disabled = true
+                        addCell.appendChild(btn);
+                    }
                 } else {
-                    btn.value = "disabled>FULL";
+                    btn.className = "fa-sharp fa-solid";
+                    btn.innerText = "FULL"
+                    btn.disabled = true
                     addCell.appendChild(btn);
                 }
             });
@@ -103,14 +112,19 @@ class CourseApp {
                 timeCell.innerText = course.time;
                 studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
 
-                removeCell.innerHTML = `<button id=\"remove-course\" onclick=\"enrollClass(${course.courseName})\"><i class=\"fa-sharp fa-solid fa-minus\"></i></button>`
+                const btn = document.createElement('button');
+                btn.onmouseup = async () => {
+                    await this.removeCourse(course.courseName);
+                };
+                btn.className = "fa-sharp fa-solid fa-minus";
+                removeCell.appendChild(btn);
             });
         } else {
             throw new InternalError(`${response.status}:${await response.text()}`);
         }
     }
 
-    async enrollClass(btn, courseName) {
+    async addCourse(courseName) {
         let response = await fetch('/courses/add', {
             method: "POST",
             headers: {
@@ -118,9 +132,17 @@ class CourseApp {
             },
             body: JSON.stringify({ "courseName": courseName })
         });
-        if (response.ok) {
-            btn.innerHTML = "disabled>FULL";
-        }
+        await this.getEnrolledTable();
+        await this.getCourseTable();
+    }
+
+    async removeCourse(courseName) {
+        let response = await fetch(`/courses/remove/${courseName.replace(" ", "%20")}`, {
+            method: "DELETE",
+            body: JSON.stringify({ "courseName": courseName })
+        });
+        await this.getEnrolledTable();
+        await this.getCourseTable();
     }
 
     async getTeacherTable() {

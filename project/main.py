@@ -71,7 +71,7 @@ def get_enrolled():
 
 @main.route('/courses/add', methods=['POST'])
 @login_required
-def enroll_course():
+def add_course():
     data = request.json
 
     c_name = data["courseName"]
@@ -82,4 +82,18 @@ def enroll_course():
             course.enrolled += 1
             current_user.courses.append(course)
             db.session.commit()
-    return "Enrolled student in course", 200
+    return "Enrolled student in course", 205
+
+
+@main.route('/courses/remove/<c_name>', methods=['DELETE'])
+@login_required
+def remove_course(c_name):
+
+    course = Course.query.filter_by(course_name=c_name).first()
+
+    if course:
+        course.enrolled -= 1
+        current_user.courses.remove(course)
+        db.session.commit()
+    print(f"De-Enrolled student from {c_name}")
+    return "Success!", 205

@@ -199,7 +199,3 @@ function courseTabs(event, tabAction) {
 function goBack() {
     window.location.href = "/courses";
 }
-
-function addButton() {
-    // window.location.href = "/courses/" + courseName + "/add";
-}

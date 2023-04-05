@@ -16,9 +16,6 @@ def create_app():
 
     db.init_app(app)
 
-    with app.app_context():
-        db.create_all()
-
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
@@ -26,9 +23,11 @@ def create_app():
     from .models import User, Course
     from .admin import AdminView
 
+    app.app_context().push()
+    db.create_all()
+
     admin = Admin(app, name="Dashboard", index_view=AdminView(
         User, db.session, url='/admin', endpoint='admin'))
-    admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(Course, db.session))
 
     @login_manager.user_loader
@@ -43,8 +42,5 @@ def create_app():
     # blueprint for non-auth parts of app
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
-
-    from .grades import grades as grades_blueprint
-    app.register_blueprint(grades_blueprint)
 
     return app

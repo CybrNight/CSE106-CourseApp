@@ -4,6 +4,7 @@ from flask import make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from . import db
+import uuid
 
 auth = Blueprint('auth', __name__)
 
@@ -31,8 +32,9 @@ def login():
         # credentials
         login_user(user, remember=remember)
         session['user'] = user.name
+        session['role'] = user.role.value
         resp = make_response(render_template("index.html"))
-        print(user.name)
+        print(user.role.value)
         resp.set_cookie("username", user.name)
         return resp
 
@@ -54,15 +56,21 @@ def signup():
             flash('Email address already exists')
             return redirect(url_for('auth.signup'))
 
+        user_id = uuid.uuid4().hex[:8]
+        exists = db.session.query(User.user_id).filter_by(
+            user_id=user_id).first() is not None
+
+        while exists:
+            user_id = uuid.uuid4().hex[:8]
         # create a new user with the form data. Hash the password so the plaintext version isn't saved.
         new_user = User(email=email, name=name,
-                        password=generate_password_hash(password, method='sha256'))
+                        password=generate_password_hash(password, method='sha256'), user_id=user_id)
 
         # add the new user to the database
         db.session.add(new_user)
         db.session.commit()
 
-        return redirect()
+        return redirect(url_for('auth.login'))
 
 
 @auth.route('/logout')

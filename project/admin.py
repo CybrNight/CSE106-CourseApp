@@ -1,7 +1,7 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask import redirect, url_for, render_template, session
-from .models import User
+from .models import UserRole
 from . import db
 
 
@@ -12,7 +12,7 @@ class AdminView(ModelView):
         self.static_folder = 'static'
 
     def is_accessible(self):
-        return session.get('user') == "Administrator"
+        return session.get('role') == UserRole.ADMIN.value
 
     def inaccessible_callback(self, name, **kwargs):
         if not self.is_accessible():

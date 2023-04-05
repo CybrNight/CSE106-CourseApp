@@ -2,7 +2,7 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background-color: #05D1B2;
+  background-color: #05d1b2;
   color: white;
 }
 
@@ -35,7 +35,8 @@ tr {
   background-color: #4e9487;
 }
 
-th, td {
+th,
+td {
   padding: 10px 15px;
   text-align: left;
   height: 10px;
@@ -43,7 +44,7 @@ th, td {
 }
 
 tr {
-  border-bottom: 1px solid #4A766E;
+  border-bottom: 1px solid #4a766e;
 }
 
 tr:nth-of-type(even) {
@@ -51,7 +52,7 @@ tr:nth-of-type(even) {
 }
 
 tr:last-of-type {
-  border-bottom: 3px solid #4A766E
+  border-bottom: 3px solid #4a766e;
 }
 
 .tab {

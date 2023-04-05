@@ -88,26 +88,17 @@ tr:last-of-type {
   background-color: #0aae95;
 }
 
-#add-course {
-  background-color: #0aae95;
-  color: white;
-  width: 60px;
-  height: 20px;
-  padding: 7px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 8px;
-}
 
-#remove-course {
+#add-course, #remove-course {
+  vertical-align: top;
+  text-align: center;
   background-color: #0aae95;
   color: white;
   width: 60px;
-  height: 20px;
-  padding: 7px;
+  height: 20px; 
+  padding: 5px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 8px;
+  font-size: 8px; 
 }

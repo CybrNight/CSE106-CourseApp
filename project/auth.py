@@ -62,7 +62,7 @@ def signup():
             user_id = uuid.uuid4().hex[:8]
         # create a new user with the form data. Hash the password so the plaintext version isn't saved.
         new_user = User(email=email, name=name,
-                        password=generate_password_hash(password, method='sha256'), user_id=user_id)
+                        password=password, user_id=user_id)
 
         # add the new user to the database
         db.session.add(new_user)

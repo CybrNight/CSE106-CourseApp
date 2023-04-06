@@ -1,11 +1,19 @@
 from flask import Blueprint, render_template, request, session
 from flask_login import login_required, current_user
 from . import db
-from .models import Course
-from .role import role_required, Role
+from .models import Course, User
 from flask import jsonify
+from .role import Role
 
 main = Blueprint('main', __name__)
+
+
+def get_prof_name(course):
+    prof = course.users.filter(User.role == Role.PROFESSOR).all()
+    prof_name = ""
+    for p in prof:
+        prof_name += p.name + "\n"
+    return prof_name
 
 
 @main.route('/')
@@ -42,7 +50,6 @@ def courses():
 
 @main.route('/courses/<course_name>', methods=['GET'])
 @login_required
-@role_required(role=Role.PROFESSOR)
 def course(course_name):
     return render_template('courseGrades.html', name=current_user.name, course=course_name)
 
@@ -57,28 +64,32 @@ def get_courses():
         in_class = False
         if c in current_user.courses:
             in_class = True
-        course_data = {'courseName': c.course_name, 'prof': c.prof,
+
+        prof_name = get_prof_name(c)
+
+        course_data = {'courseName': c.course_name, 'prof': prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll, "in_class": in_class}
         output.append(course_data)
     return jsonify(output)
 
 
-@main.route('/getEnrolled', methods=['GET'])
-@login_required
+@ main.route('/getEnrolled', methods=['GET'])
+@ login_required
 def get_enrolled():
     classes = current_user.courses
 
     output = []
     for c in classes:
-        course_data = {'courseName': c.course_name, 'prof': c.prof,
+        prof_name = get_prof_name(c)
+        course_data = {'courseName': c.course_name, 'prof': prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
         output.append(course_data)
     print(output)
     return jsonify(output)
 
 
-@main.route('/courses/add', methods=['POST'])
-@login_required
+@ main.route('/courses/add', methods=['POST'])
+@ login_required
 def add_course():
     data = request.json
 
@@ -93,8 +104,8 @@ def add_course():
     return "Enrolled student in course", 205
 
 
-@main.route('/courses/remove/<c_name>', methods=['DELETE'])
-@login_required
+@ main.route('/courses/remove/<c_name>', methods=['DELETE'])
+@ login_required
 def remove_course(c_name):
 
     course = Course.query.filter_by(course_name=c_name).first()

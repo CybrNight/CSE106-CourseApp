@@ -21,17 +21,28 @@ class User(UserMixin, db.Model):
     user_id = db.Column(db.String, unique=True)
     role = db.Column(db.Enum(Role))
     courses = db.relationship(
-        'Course', secondary=enrollment, backref="courses")
+        'Course', secondary=enrollment, backref=db.backref('users', lazy='dynamic'))
+
+    def __repr__(self):
+        return self.name
 
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     course_name = db.Column(db.String(100), unique=True)
-    prof = db.Column(db.String(100))
-    prof_id = db.Column(db.String(100))
     time = db.Column(db.String(100))
     enrolled = db.Column(db.Integer)
     max_enroll = db.Column(db.Integer)
+
+    def __repr__(self):
+        return self.course_name
+
+
+@event.listens_for(User.password, 'set', retval=True)
+def hash_user_password(target, value, oldvalue, initiator):
+    if value != oldvalue:
+        return generate_password_hash(value, method="sha256")
+    return value
 
 
 @event.listens_for(User.user_id, 'set', retval=True)

@@ -4,8 +4,18 @@ from flask_login import LoginManager
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
+from project.role import Role
+
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
+
+
+def create_admin():
+    from .models import User
+
+    db.session.add(User(role=Role.ADMIN, name="ADMIN",
+                   email="admin@me.com", password="123"))
+    db.session.commit()
 
 
 def create_app():

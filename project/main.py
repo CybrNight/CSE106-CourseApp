@@ -40,12 +40,13 @@ def forbidden(e):
 @main.route('/courses', methods=['GET'])
 @login_required
 def courses():
+    if current_user.is_admin():
+        return redirect("/admin")
+
     if current_user.role == Role.PROFESSOR:
         return render_template('teacher.html')
     elif current_user.role == Role.STUDENT:
         return render_template('courses.html')
-    elif current_user.role == Role.ADMIN:
-        return redirect("/admin")
     return render_template('index.html')
 
 
@@ -99,9 +100,7 @@ def add_course():
 
     if course:
         if course.enrolled < course.max_enroll and not course in current_user.courses:
-            course.enrolled += 1
-            current_user.courses.append(course)
-            db.session.commit()
+            current_user.add_course(course)
     return "Enrolled student in course", 205
 
 

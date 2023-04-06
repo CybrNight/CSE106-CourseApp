@@ -29,12 +29,12 @@
                   Home
                 </a>
                 {% if current_user.is_authenticated and not
-                current_user.role.value == "ADMIN" %}
+                current_user.is_admin() %}
                 <a href="{{ url_for('main.courses') }}" class="navbar-item">
                   Courses
                 </a>
                 {% endif %} {% if current_user.is_authenticated and
-                current_user.role.value == "ADMIN" %}
+                current_user.is_admin() %}
                 <a href="/admin" class="navbar-item"> Admin </a>
                 {% endif %} {% if not current_user.is_authenticated %}
                 <a href="{{ url_for('auth.login') }}" class="navbar-item">

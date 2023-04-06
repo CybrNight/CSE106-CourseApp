@@ -23,6 +23,14 @@ class User(UserMixin, db.Model):
     courses = db.relationship(
         'Course', secondary=enrollment, backref=db.backref('users', lazy='dynamic'))
 
+    def add_course(self, course):
+        self.courses.append(course)
+        course.enrolled += 1
+        db.session.commit()
+
+    def is_admin(self):
+        return self.role == Role.ADMIN
+
     def __repr__(self):
         return self.name
 

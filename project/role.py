@@ -8,3 +8,6 @@ class Role(Enum):
     STUDENT = "STUDENT"
     PROFESSOR = "PROFESSOR"
     ADMIN = "ADMIN"
+
+    def __str__(self) -> str:
+        return self.value

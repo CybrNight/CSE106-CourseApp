@@ -34,7 +34,7 @@ def login():
         # credentials
         login_user(user, remember=remember)
 
-        if user.role == Role.ADMIN:
+        if user.is_admin():
             return (redirect("/admin"))
         return redirect(url_for("main.index"))
 

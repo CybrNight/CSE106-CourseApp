@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session
+from flask import Blueprint, redirect, render_template, request, session
 from flask_login import login_required, current_user
 from . import db
 from .models import Course, User
@@ -40,11 +40,12 @@ def forbidden(e):
 @main.route('/courses', methods=['GET'])
 @login_required
 def courses():
-    # should be if user.type == 'teacher' once implemented
     if current_user.role == Role.PROFESSOR:
         return render_template('teacher.html')
     elif current_user.role == Role.STUDENT:
         return render_template('courses.html')
+    elif current_user.role == Role.ADMIN:
+        return redirect("/admin")
     return render_template('index.html')
 
 

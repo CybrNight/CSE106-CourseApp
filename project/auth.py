@@ -3,6 +3,7 @@ from flask_login import login_user, login_required, logout_user
 from flask import make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
+from project.role import Role
 from . import db
 import uuid
 from functools import wraps
@@ -32,9 +33,10 @@ def login():
         # if the above check passes, then we know the user has the right
         # credentials
         login_user(user, remember=remember)
-        resp = make_response(render_template("index.html"))
-        resp.set_cookie("username", user.name)
-        return resp
+
+        if user.role == Role.ADMIN:
+            return (redirect("/admin"))
+        return redirect(url_for("main.index"))
 
 
 @auth.route('/signup', methods=['GET', 'POST'])

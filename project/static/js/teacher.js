@@ -37,7 +37,6 @@ class CourseApp {
                     console.log('hello');
                     var row = This.teacherTable.insertRow();
                     var courseNameCell = row.insertCell();
-                    var profCell = row.insertCell();
                     var timeCell = row.insertCell();
                     var studentsCell = row.insertCell();
 
@@ -45,7 +44,6 @@ class CourseApp {
 
                     // course button for courses/courseName
                     courseNameCell.innerHTML = '<a href="/courses/' + course.courseName + '">' + course.courseName + '</a>';
-                    profCell.innerText = course.prof;
                     timeCell.innerText = course.time;
                     studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
                 }

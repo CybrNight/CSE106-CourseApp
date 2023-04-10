@@ -44,12 +44,13 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
-    from .models import User, Course
+    from .models import User, Course, Enrollment
     from .admin import AdminView
 
     admin = Admin(app, name="Dashboard", index_view=AdminView(
         User, db.session, url='/admin', endpoint='admin'))
     admin.add_view(ModelView(Course, db.session))
+    admin.add_view(ModelView(Enrollment, db.session))
 
     @ login_manager.user_loader
     def load_user(user_id):

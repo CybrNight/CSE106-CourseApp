@@ -1,6 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy import event
+from flask_admin.contrib.sqla import ModelView
 from werkzeug.security import generate_password_hash
 import uuid
 from .role import Role
@@ -27,6 +28,9 @@ class Enrollment(db.Model):
     course = db.relationship(
         "Course", back_populates="enrollment")
     grade = db.Column(db.Integer)
+
+    def __repr__(self):
+        return self.course.course_name
 
 
 class User(UserMixin, db.Model):

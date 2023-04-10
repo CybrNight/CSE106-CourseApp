@@ -8,7 +8,7 @@ from project.main import db
 
 class AdminView(ModelView):
     column_hide_backrefs = False
-    column_list = ('email', 'courses', 'role', 'user_id')
+    column_list = ('email', 'enrollment', 'role', 'user_id')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

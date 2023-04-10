@@ -15,19 +15,21 @@ def create_default_accounts():
 
     db.session.add(User(role=Role.ADMIN, name="ADMIN",
                         email="admin@me.com", password="123"))
+    prof = User(
+        name=f"Professor", email=f"prof@me.com", password="123", role=Role.PROFESSOR)
+    users = []
+    courses = []
     for i in range(0, 8):
-        course = Course(course_name=f"CSE{100+(i*5)}", time="MWF 10:00-10:50AM",
-                        enrolled=0, max_enroll=8)
-        prof = User(
-            name=f"Professor{i}", email=f"prof{i}@me.com", password="123", role=Role.PROFESSOR)
-        user = User(
-            name=f"Student{i}", email=f"student{i}@me.com", password="123", role=Role.STUDENT)
-        db.session.add(course)
-        db.session.add(prof)
-        db.session.add(user)
-        db.session.add(Enrollment(user=user, course=course, grade=90))
-        db.session.add(Enrollment(user=prof, course=course, grade=85))
-        db.session.commit()
+        courses.append(Course(course_name=f"CSE{100+(i*5)}", time="MWF 10:00-10:50AM",
+                              enrolled=0, max_enroll=8))
+        users.append(User(
+            name=f"Student{i}", email=f"student{i}@me.com", password="123", role=Role.STUDENT))
+
+    for course in courses:
+        db.session.add(Enrollment(user=prof, course=course, grade=0))
+        for user in users:
+            user.add_course(course)
+    db.session.commit()
 
 
 def create_app():

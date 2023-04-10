@@ -58,6 +58,19 @@ def course(course_name):
     return render_template('courseGrades.html', name=current_user.name, course=course_name)
 
 
+@main.route('/courses/<c_name>/students', methods=['GET'])
+def get_course_students(c_name):
+    enrollments = Enrollment.query.join(User).join(Course).filter(
+        (User.role == Role.STUDENT) & (Course.course_name == c_name)).all()
+
+    output = []
+
+    for e in enrollments:
+        grade = {"id": e.user_id, "name": e.user.name, "grade": e.grade}
+        output.append(grade)
+    return jsonify(output)
+
+
 @main.route('/getCourses', methods=['GET'])
 @login_required
 def get_courses():
@@ -68,7 +81,6 @@ def get_courses():
     for c in classes:
         in_class = False
 
-        print(current_user.enrollment)
         for e in current_user.enrollment:
             if c == e.course:
                 in_class = True

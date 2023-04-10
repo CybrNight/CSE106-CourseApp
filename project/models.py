@@ -41,7 +41,7 @@ class User(UserMixin, db.Model):
         "Enrollment", back_populates="user", lazy="joined")
 
     def add_course(self, course):
-        self.courses.append(course)
+        db.session.add(Enrollment(user=self, course=course, grade=100))
         course.enrolled += 1
         db.session.commit()
 

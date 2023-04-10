@@ -137,3 +137,19 @@ def remove_course(c_name):
         db.session.commit()
     print(f"De-Enrolled student from {c_name}")
     return "Success!", 205
+
+@ main.route('/courses/<c_name>/students', methods=['PUT'])
+@ login_required
+def update_grades(c_name):
+    data = request.json
+    enrollment = Enrollment.query.join(Course).join(User).filter(
+        (User.role == Role.STUDENT) & (Course.course_name == c_name)).all()
+
+    print(data)
+    for e in enrollment:
+        for d in data:
+                #e.grade = data[grade]
+                db.session.commit()
+
+    db.session.commit()
+    return "Success!", 205

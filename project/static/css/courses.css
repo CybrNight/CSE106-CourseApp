@@ -102,3 +102,7 @@ tr:last-of-type {
   cursor: pointer;
   font-size: 8px; 
 }
+
+#saveGrades {
+  float: right;
+}

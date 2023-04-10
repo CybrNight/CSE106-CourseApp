@@ -34,6 +34,7 @@ class GradesApp {
                 const row = This.gradesTable.insertRow();
                 const studentsCell = row.insertCell();
                 const gradeCell = row.insertCell();
+                gradeCell.setAttribute('contenteditable', 'true')
 
                 //Set the cell values to the name (key) and grade (json[key])
                 studentsCell.innerText = student.name;
@@ -74,4 +75,34 @@ function courseTabs(event, tabAction) {
 
 function goBack() {
     window.location.href = "/courses";
+}
+
+//post grades to database using @ main.route('/courses/<c_name>/students', methods=['POST'])
+function saveGrades() {
+    var table = document.getElementById("grades-table");
+    var rows = table.rows;
+    var grades = [];
+    for (var i = 1; i < rows.length; i++) {
+        var grade = rows[i].cells[1].innerHTML;
+        grades.push(grade);
+    }
+    var data = {
+        grades: grades
+    }
+    console.log(data);
+    fetch(`/courses/${course}/students`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            console.log("Success");
+        } else {
+            throw new Error("Error");
+        }
+    }).catch(error => {
+        console.log(error);
+    });
 }

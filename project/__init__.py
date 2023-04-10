@@ -4,8 +4,25 @@ from flask_login import LoginManager
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
+from project.role import Role
+
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
+
+
+def create_default_accounts():
+    from .models import User, Course
+
+    db.session.add(User(role=Role.ADMIN, name="ADMIN",
+                        email="admin@me.com", password="123"))
+    for i in range(0, 8):
+        db.session.add(Course(course_name=f"CSE{100+(i*5)}", time="MWF 10:00-10:50AM",
+                       enrolled=0, max_enroll=8))
+        db.session.add(User(
+            name=f"Professor{i}", email=f"prof{i}@me.com", password="123", role=Role.PROFESSOR))
+        db.session.add(User(
+            name=f"Student{i}", email=f"student{i}@me.com", password="123", role=Role.STUDENT))
+        db.session.commit()
 
 
 def create_app():
@@ -23,14 +40,11 @@ def create_app():
     from .models import User, Course
     from .admin import AdminView
 
-    app.app_context().push()
-    db.create_all()
-
     admin = Admin(app, name="Dashboard", index_view=AdminView(
         User, db.session, url='/admin', endpoint='admin'))
     admin.add_view(ModelView(Course, db.session))
 
-    @login_manager.user_loader
+    @ login_manager.user_loader
     def load_user(user_id):
         # since the user_id is just the primary key of our user table, use it in the query for the user
         return User.query.get(int(user_id))
@@ -44,3 +58,11 @@ def create_app():
     app.register_blueprint(main_blueprint)
 
     return app
+
+
+def rebuild():
+    app = create_app()
+    app.app_context().push()
+    db.drop_all()
+    db.create_all()
+    create_default_accounts()

@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, session
 from flask_login import login_required, current_user
 from . import db
-from .models import Course, User
+from .models import Course, User, Enrollment
 from flask import jsonify
 from .role import Role
 
@@ -70,39 +70,39 @@ def get_course_students(c_name):
         output.append(grade)
     return jsonify(output)
 
-
 @main.route('/getCourses', methods=['GET'])
 @login_required
 def get_courses():
     classes = Course.query.all()
 
     output = []
+
     for c in classes:
         in_class = False
-        if c in current_user.courses:
-            in_class = True
+
+        for e in current_user.enrollment:
+            if c == e.course:
+                in_class = True
 
         prof_name = get_prof_name(c)
 
         course_data = {'courseName': c.name, 'prof': prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll, "in_class": in_class}
         output.append(course_data)
+
     return jsonify(output)
 
 
 @ main.route('/getEnrolled', methods=['GET'])
 @ login_required
 def get_enrolled():
-    classes = current_user.courses
-
     output = []
     for e in current_user.enrollment:
         c = e.course
-        prof_name = "TEST"
+        prof_name = get_prof_name(e.course)
         course_data = {'courseName': c.name, 'prof': prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
         output.append(course_data)
-    print(output)
     return jsonify(output)
 
 

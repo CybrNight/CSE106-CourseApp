@@ -1,7 +1,8 @@
 {% extends "base.html" %} {% block content %} {% block head %} {{ super() }}
-<script src="{{ url_for('static',filename='js/courses.js') }}"></script>
+<script src="{{ url_for('static',filename='js/courseGrade.js') }}"></script>
 <script>
-  var username = "{{ name }}";
+  var username = "{{ current_user.name }}";
+  let course = "{{course}}";
 </script>
 <link
   rel="stylesheet"
@@ -16,7 +17,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 />
 {% endblock %}
-<h1 class="title">Welcome, {{ name }}!</h1>
+<h1 class="title">Welcome, {{ current_user.name }}!</h1>
 <hr class="rounded" />
 
 <div class="tab">
@@ -45,6 +46,6 @@
   </div>
 </div>
 <script>
-  document.getElementById("defaultOpen").click();
+  document.getElementById("courseGrades").click();
 </script>
 {% endblock %}

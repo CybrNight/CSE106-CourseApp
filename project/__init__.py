@@ -11,7 +11,7 @@ db = SQLAlchemy()
 
 
 def create_default_accounts():
-    from .models import User, Course
+    from .models import User, Course, Enrollment
 
     db.session.add(User(role=Role.ADMIN, name="ADMIN",
                         email="admin@me.com", password="123", user_id="temp"))
@@ -26,7 +26,7 @@ def create_default_accounts():
             name=f"Student{i}", email=f"student{i}@me.com", password="123", role=Role.STUDENT, user_id="temp"))
 
     for course in courses:
-        db.session.add(Enrollment(user=prof, course=course, grade=0))
+        course.add_user(prof)
         for user in users:
             course.add_user(user)
     db.session.commit()
@@ -44,12 +44,13 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
-    from .models import User, Course
+    from .models import User, Course, Enrollment
     from .admin import AdminView
 
     admin = Admin(app, name="Dashboard", index_view=AdminView(
         User, db.session, url='/admin', endpoint='admin'))
     admin.add_view(ModelView(Course, db.session))
+    admin.add_view(ModelView(Enrollment, db.session))
 
     @ login_manager.user_loader
     def load_user(user_id):

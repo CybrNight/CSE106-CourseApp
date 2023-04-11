@@ -54,15 +54,9 @@ def signup():
             flash('Email address already exists')
             return redirect(url_for('auth.signup'))
 
-        user_id = uuid.uuid4().hex[:8]
-        exists = db.session.query(User.user_id).filter_by(
-            user_id=user_id).first() is not None
-
-        while exists:
-            user_id = uuid.uuid4().hex[:8]
         # create a new user with the form data. Hash the password so the plaintext version isn't saved.
         new_user = User(email=email, name=name,
-                        password=password, user_id=user_id)
+                        password=password)
 
         # add the new user to the database
         db.session.add(new_user)

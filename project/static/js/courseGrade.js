@@ -82,6 +82,7 @@ window.onload = function () {
     btnSaveGrades.addEventListener('click', button => {
         c.saveGrades();
     });
+    c.showAllGrades();
 }
 
 function courseTabs(event, tabAction) {

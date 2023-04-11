@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, session
 from flask_login import login_required, current_user
 from . import db
-from .models import Course, User
+from .models import Course, User, Enrollment
 from flask import jsonify
 from .role import Role
 
@@ -9,7 +9,9 @@ main = Blueprint('main', __name__)
 
 
 def get_prof_name(course):
-    prof = course.users.filter(User.role == Role.PROFESSOR).all()
+    prof = User.query.join(Enrollment).join(Course).filter(
+        (User.role == Role.PROFESSOR) & (Course.course_name == course.course_name)).all()
+    '''prof = enrollment.course.filter(User.role == Role.PROFESSOR).all()'''
     prof_name = ""
     for p in prof:
         prof_name += p.name + "\n"
@@ -56,37 +58,52 @@ def course(course_name):
     return render_template('courseGrades.html', name=current_user.name, course=course_name)
 
 
+@main.route('/courses/<c_name>/students', methods=['GET'])
+def get_course_students(c_name):
+    enrollments = Enrollment.query.join(User).join(Course).filter(
+        (User.role == Role.STUDENT) & (Course.course_name == c_name)).all()
+
+    output = []
+
+    for e in enrollments:
+        grade = {"id": e.user_id, "name": e.user.name, "grade": e.grade}
+        output.append(grade)
+    return jsonify(output)
+
+
 @main.route('/getCourses', methods=['GET'])
 @login_required
 def get_courses():
     classes = Course.query.all()
 
     output = []
+
     for c in classes:
         in_class = False
-        if c in current_user.courses:
-            in_class = True
+
+        for e in current_user.enrollment:
+            if c == e.course:
+                in_class = True
 
         prof_name = get_prof_name(c)
 
         course_data = {'courseName': c.course_name, 'prof': prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll, "in_class": in_class}
         output.append(course_data)
+
     return jsonify(output)
 
 
 @ main.route('/getEnrolled', methods=['GET'])
 @ login_required
 def get_enrolled():
-    classes = current_user.courses
-
     output = []
-    for c in classes:
-        prof_name = get_prof_name(c)
+    for e in current_user.enrollment:
+        c = e.course
+        prof_name = "TEST"
         course_data = {'courseName': c.course_name, 'prof': prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
         output.append(course_data)
-    print(output)
     return jsonify(output)
 
 
@@ -99,8 +116,11 @@ def add_course():
     course = Course.query.filter_by(course_name=c_name).first()
 
     if course:
-        if course.enrolled < course.max_enroll and not course in current_user.courses:
-            current_user.add_course(course)
+        if course.enrolled < course.max_enroll:
+            course.enrolled += 1
+            db.session.add(Enrollment(
+                user=current_user, course=course, grade=100))
+            db.session.commit()
     return "Enrolled student in course", 205
 
 
@@ -108,11 +128,12 @@ def add_course():
 @ login_required
 def remove_course(c_name):
 
-    course = Course.query.filter_by(course_name=c_name).first()
-
+    enrollment = Enrollment.query.join(Course).join(User).filter(
+        ((Course.course_name == c_name) & (User.name == current_user.name)))
+    course = enrollment.one().course
     if course:
         course.enrolled -= 1
-        current_user.courses.remove(course)
+        Enrollment.query.filter_by(course=course).delete()
         db.session.commit()
     print(f"De-Enrolled student from {c_name}")
     return "Success!", 205

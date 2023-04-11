@@ -11,18 +11,25 @@ db = SQLAlchemy()
 
 
 def create_default_accounts():
-    from .models import User, Course
+    from .models import User, Course, Enrollment
 
     db.session.add(User(role=Role.ADMIN, name="ADMIN",
                         email="admin@me.com", password="123"))
+    prof = User(
+        name=f"Professor", email=f"prof@me.com", password="123", role=Role.PROFESSOR)
+    users = []
+    courses = []
     for i in range(0, 8):
-        db.session.add(Course(course_name=f"CSE{100+(i*5)}", time="MWF 10:00-10:50AM",
-                       enrolled=0, max_enroll=8))
-        db.session.add(User(
-            name=f"Professor{i}", email=f"prof{i}@me.com", password="123", role=Role.PROFESSOR))
-        db.session.add(User(
+        courses.append(Course(course_name=f"CSE{100+(i*5)}", time="MWF 10:00-10:50AM",
+                              enrolled=0, max_enroll=8))
+        users.append(User(
             name=f"Student{i}", email=f"student{i}@me.com", password="123", role=Role.STUDENT))
-        db.session.commit()
+
+    for course in courses:
+        db.session.add(Enrollment(user=prof, course=course, grade=0))
+        for user in users:
+            user.add_course(course)
+    db.session.commit()
 
 
 def create_app():
@@ -37,12 +44,13 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
-    from .models import User, Course
+    from .models import User, Course, Enrollment
     from .admin import AdminView
 
     admin = Admin(app, name="Dashboard", index_view=AdminView(
         User, db.session, url='/admin', endpoint='admin'))
     admin.add_view(ModelView(Course, db.session))
+    admin.add_view(ModelView(Enrollment, db.session))
 
     @ login_manager.user_loader
     def load_user(user_id):

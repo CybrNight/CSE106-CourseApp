@@ -1,8 +1,10 @@
 from flask import Blueprint, session, render_template, redirect, url_for, request, flash
 from flask_login import login_user, login_required, logout_user
+from flask import make_response
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User
-from . import db
+from project.models import User
+from project.main import db
+import uuid
 
 auth = Blueprint('auth', __name__)
 
@@ -29,8 +31,10 @@ def login():
         # if the above check passes, then we know the user has the right
         # credentials
         login_user(user, remember=remember)
-        session['user'] = user.name
-        return redirect(request.args.get('next') or url_for('main.profile'))
+
+        if user.is_admin():
+            return (redirect("/admin"))
+        return redirect(url_for("main.index"))
 
 
 @auth.route('/signup', methods=['GET', 'POST'])
@@ -38,23 +42,23 @@ def signup():
     if request.method == 'GET':
         return render_template('signup.html')
     elif request.method == 'POST':
-        # code to validate and add user to database goes here
+        # Get user input
         email = request.form.get('email')
         name = request.form.get('name')
         password = request.form.get('password')
 
-        # if this returns a user, then the email already exists in database
+        # If user is found, already in db
         user = User.query.filter_by(email=email).first()
 
-        if user:  # if a user is found, we want to redirect back to signup page so user can try again
+        if user:  # Flash error is user already exists
             flash('Email address already exists')
             return redirect(url_for('auth.signup'))
 
-        # create a new user with the form data. Hash the password so the plaintext version isn't saved.
+        # Create new user object, password hashing handled in models.py
         new_user = User(email=email, name=name,
-                        password=generate_password_hash(password, method='sha256'))
+                        password=password)
 
-        # add the new user to the database
+        # Add user to db
         db.session.add(new_user)
         db.session.commit()
 

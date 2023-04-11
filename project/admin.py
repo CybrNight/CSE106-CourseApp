@@ -66,6 +66,7 @@ class AdminView(ModelView):
             if e.course.enrolled > e.course.max_enroll:
                 db.session.rollback()
                 raise ValueError(f"Class ({e.course}) above capacity")
+        db.session.commit()
         return True
 
     # Updates the model after changes are done
@@ -76,15 +77,18 @@ class AdminView(ModelView):
 
             if e.course:
                 e.course.set_enroll_count()
+        db.session.commit()
 
 
 class CourseView(ModelView):
+    # Setup columns to show in view
     column_hide_backrefs = False
     column_list = ('course_id', 'name', 'prof_name', 'time', 'enrolled',
                    'max_enroll', 'enrollment')
 
     inline_models = (Enrollment,)
 
+    # Setup columns for edit/create mode
     form_excluded_columns = ('course_id', 'enrollment')
 
     form_create_rules = ('name', 'time',
@@ -105,6 +109,7 @@ class CourseView(ModelView):
         super().__init__(*args, **kwargs)
         self.static_folder = 'static'
 
+    # Called when model is updated
     def on_model_change(self, form, model, is_created):
         if is_created:
             course_id = uuid.uuid4().hex[:8]
@@ -116,18 +121,17 @@ class CourseView(ModelView):
 
             model.course_id = course_id
         model.set_enroll_count()
+
+        # Check if course is over capacity
         if model.enrolled > model.max_enroll:
+
+            # Rollback changes and show error to user
             db.session.rollback()
             raise ValueError(f"Class ({model.name}) above capacity")
 
+        db.session.commit()
         return True
 
     def after_model_change(self, form, model, is_created):
         model.update()
-
-    def handle_view_exception(self, exc):
-        db.session.rollback()
-        if isinstance(exc, ValueError):
-            flash(f'{str(exc)}', 'error')
-            return True
-        return False
+        db.session.commit()

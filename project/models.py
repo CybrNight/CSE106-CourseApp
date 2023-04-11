@@ -50,6 +50,8 @@ class User(UserMixin, db.Model):
         self.email = email
         self.password = password
         self.role = role
+
+        # When a new User object is initialized, set its user_id to unique value
         user_id = uuid.uuid4().hex[:8]
         exists = db.session.query(User.user_id).filter_by(
             user_id=user_id).first() is not None
@@ -59,6 +61,7 @@ class User(UserMixin, db.Model):
 
         self.user_id = user_id
 
+        # Set email to generic template based on first+last name
         if self.email == "default":
             names = name.split(" ")
 
@@ -100,11 +103,13 @@ class Course(db.Model):
     def __repr__(self):
         return self.name
 
+    # Update the enroll count
     def set_enroll_count(self):
         enrollment = Enrollment.query.join(Course).join(User).filter(
             (User.role == Role.STUDENT) & (Course.name == self.name)).all()
         self.enrolled = len(enrollment)
 
+    # Update the professor name
     def set_prof_name(self):
         enrollment = Enrollment.query.join(Course).join(User).filter(
             (User.role == Role.PROFESSOR) & (Course.name == self.name)).all()
@@ -116,6 +121,7 @@ class Course(db.Model):
         self.set_enroll_count()
         self.set_prof_name()
 
+    # Add user to course enrollment
     def add_user(self, user, grade=-1):
         if grade == -1:
             grade = randint(0, 100)
@@ -127,6 +133,7 @@ class Course(db.Model):
             raise Exception(f"Class {self} full!")
         self.update()
 
+    # Remove user from course enrollment
     def remove_user(self, user):
         test = Enrollment.query.filter_by(
             course_id=self.course_id, user_id=user.user_id).delete()

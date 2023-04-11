@@ -36,6 +36,7 @@ class GradesApp {
                 const gradeCell = row.insertCell();
                 gradeCell.setAttribute('contenteditable', 'true')
 
+
                 //Set the cell values to the name (key) and grade (json[key])
                 studentsCell.innerText = student.name;
                 gradeCell.innerText = student.grade;
@@ -81,8 +82,6 @@ window.onload = function () {
     btnSaveGrades.addEventListener('click', button => {
         c.saveGrades();
     });
-
-    c.showAllGrades();
 }
 
 function courseTabs(event, tabAction) {

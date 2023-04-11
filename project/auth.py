@@ -2,11 +2,9 @@ from flask import Blueprint, session, render_template, redirect, url_for, reques
 from flask_login import login_user, login_required, logout_user
 from flask import make_response
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User
-from project.role import Role
-from . import db
+from project.models import User
+from project.main import db
 import uuid
-from functools import wraps
 
 auth = Blueprint('auth', __name__)
 

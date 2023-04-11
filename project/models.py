@@ -6,14 +6,6 @@ from werkzeug.security import generate_password_hash
 import uuid
 from .role import Role
 
-'''enrollment = db.Table("enrollment",
-                      db.Column("user_id", db.Integer,
-                                db.ForeignKey('user.id')),
-                      db.Column("course_id", db.Integer,
-                                db.ForeignKey('course.id')),
-                      db.Column('course_grade', db.ForeignKey('course_grade.id')))'''
-
-
 class Enrollment(db.Model):
     __tablename__ = "enrollment"
 

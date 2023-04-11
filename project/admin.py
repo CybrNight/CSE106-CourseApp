@@ -2,13 +2,13 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask import redirect, url_for, render_template, session
 from flask_login import current_user
-from .models import Role
-from . import db
+from .models import Role, User
+from project.main import db
 
 
 class AdminView(ModelView):
     column_hide_backrefs = False
-    column_list = ('email', 'courses', 'role', 'user_id')
+    column_list = ('email', 'enrollment', 'role', 'user_id')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

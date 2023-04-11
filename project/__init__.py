@@ -89,7 +89,7 @@ def create_random_users():
         courses[i].add_user(profs[i-1])
 
         if randint(0, 25) < 10:
-            courses[i].add_user(profs[i])
+            courses[i].add_user(profs[i], )
         for user in users:
             db.session.add(user)
 
@@ -112,12 +112,6 @@ def create_app():
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.session_protection = "strong"
-    login_manager.refresh_view = "auth.login"
-
-    login_manager.needs_refresh_message = (
-        u"To protect your account, please reauthenticate to access this page."
-    )
-    login_manager.needs_refresh_message_category = "info"
     login_manager.init_app(app)
 
     from .models import User, Course, Enrollment

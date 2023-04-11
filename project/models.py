@@ -6,10 +6,25 @@ from werkzeug.security import generate_password_hash
 import uuid
 from .role import Role
 
-enrollment = db.Table("enrollment",
-                      db.Column("user_id", db.Integer,
-                                db.ForeignKey('user.id')),
-                      db.Column("course_id", db.Integer, db.ForeignKey('course.id')))
+
+class Enrollment(db.Model):
+    __tablename__ = "enrollment"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        "user.user_id"), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey(
+        "course.id"), nullable=False)
+
+    __table_args__ = (db.UniqueConstraint(user_id, course_id),)
+
+    user = db.relationship("User", back_populates="enrollment")
+    course = db.relationship(
+        "Course", back_populates="enrollment")
+    grade = db.Column(db.Integer)
+
+    def __repr__(self):
+        return self.course.name + " " + self.user.name
 
 
 class User(UserMixin, db.Model):
@@ -23,11 +38,6 @@ class User(UserMixin, db.Model):
     courses = db.relationship(
         'Course', secondary=enrollment, backref=db.backref('users', lazy='dynamic'))
 
-    def add_course(self, course):
-        self.courses.append(course)
-        course.enrolled += 1
-        db.session.commit()
-
     def is_admin(self):
         return self.role == Role.ADMIN
 
@@ -37,13 +47,30 @@ class User(UserMixin, db.Model):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    course_name = db.Column(db.String(100), unique=True)
+    name = db.Column(db.String(100), unique=True)
     time = db.Column(db.String(100))
     enrolled = db.Column(db.Integer)
     max_enroll = db.Column(db.Integer)
 
     def __repr__(self):
-        return self.course_name
+        return self.name
+
+    def set_enroll_count(self):
+        enrollment = Enrollment.query.join(Course).join(User).filter(
+            (User.role == Role.STUDENT) & (Course.name == self.name)).all()
+        self.enrolled = len(enrollment)
+        return self.enrolled
+
+    def add_user(self, user):
+        if self.enrolled < self.max_enroll:
+            db.session.add(Enrollment(user=user, course=self, grade=100))
+            self.set_enroll_count()
+            db.session.commit()
+
+    def remove_user(self, user):
+        Enrollment.query.filter_by(course=self, user=user).delete()
+        self.set_enroll_count()
+        db.session.commit()
 
 
 @event.listens_for(User.password, 'set', retval=True)

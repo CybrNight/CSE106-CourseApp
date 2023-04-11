@@ -6,7 +6,8 @@ class GradesApp {
 
     async showAllGrades() {
         const This = this;
-        let response = await fetch(`/courses/${course}/students`, {
+        console.log(course)
+        let response = await fetch(`/courses/${courseId}/students`, {
             method: "GET"
         });
         if (response.ok) {
@@ -62,7 +63,7 @@ class GradesApp {
             grades.push({ [user_id]: grade });
         }
         console.log(grades);
-        fetch(`/courses/${course}/students`, {
+        fetch(`/courses/${courseId}/students`, {
             method: 'PUT',
             body: JSON.stringify(grades),
             headers: {

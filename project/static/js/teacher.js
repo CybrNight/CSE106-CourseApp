@@ -34,7 +34,6 @@ class CourseApp {
                 //check if course.prof is the same as the logged in user
                 console.log(course)
                 if (course.in_class) {
-                    console.log('hello');
                     var row = This.teacherTable.insertRow();
                     var courseNameCell = row.insertCell();
                     var timeCell = row.insertCell();
@@ -43,7 +42,7 @@ class CourseApp {
                     //Set the cell values to the name (key) and grade (json[key])
 
                     // course button for courses/courseName
-                    courseNameCell.innerHTML = '<a href="/courses/' + course.courseName + '">' + course.courseName + '</a>';
+                    courseNameCell.innerHTML = '<a href="/courses/' + course.courseId + '">' + course.courseName + '</a>';
                     timeCell.innerText = course.time;
                     studentsCell.innerText = `${course.enrolled} / ${course.maxEnroll}`;
                 }

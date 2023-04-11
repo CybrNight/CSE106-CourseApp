@@ -43,17 +43,18 @@ def courses():
     return render_template('index.html')
 
 
-@ main.route('/courses/<c_name>', methods=['GET'])
+@ main.route('/courses/<c_id>', methods=['GET'])
 @fresh_login_required
-def course(c_name):
-    return render_template('courseGrades.html', name=current_user.name, course=c_name)
+def course(c_id):
+    course = Course.query.filter_by(course_id=c_id).first()
+    return render_template('courseGrades.html', name=current_user.name, c_id=c_id, course=course.name)
 
 
-@ main.route('/courses/<c_name>/students', methods=['GET'])
+@ main.route('/courses/<c_id>/students', methods=['GET'])
 @login_required
-def get_course_students(c_name):
+def get_course_students(c_id):
     enrollments = Enrollment.query.join(User).join(Course).filter(
-        (User.role == Role.STUDENT) & (Course.name == c_name)).all()
+        (User.role == Role.STUDENT) & (Course.course_id == c_id)).all()
 
     output = []
 
@@ -126,15 +127,16 @@ def remove_course(c_id):
     return "Not found", 404
 
 
-@ main.route('/courses/<c_name>/students', methods=['PUT'])
+@ main.route('/courses/<c_id>/students', methods=['PUT'])
 @ login_required
-def update_grades(c_name):
+def update_grades(c_id):
     data = request.json
 
     for user in data:
         for key, value in user.items():
             user = Enrollment.query.join(Course).join(User).filter(
-                (User.role == Role.STUDENT) & (User.user_id == key) & (Course.name == c_name)).first()
+                (User.role == Role.STUDENT) & (User.user_id == key) & (Course.course_id == c_id)).first()
+            print(c_id)
             user.grade = value
     db.session.commit()
     return "Success!", 205

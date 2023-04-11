@@ -78,6 +78,17 @@ def get_course_students(c_id):
     # Get all students in course by id
     enrollments = Enrollment.query.join(User).join(Course).filter(
         (User.role == Role.STUDENT) & (Course.course_id == c_id)).all()
+    prof = nrollments = Enrollment.query.join(User).join(Course).filter(
+        (User.role == Role.PROFESSOR) & (Course.course_id == c_id)).all()
+
+    access = False
+    for p in prof:
+        print(p)
+        if p.user_id == current_user.user_id:
+            access = True
+
+    if not access or len(prof) == 0:
+        return redirect(url_for("main.courses"))
 
     if len(enrollments) == 0:
         return redirect(url_for("main.courses"))

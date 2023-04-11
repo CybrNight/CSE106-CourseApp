@@ -9,12 +9,14 @@ import uuid
 
 
 class AdminView(ModelView):
+    # Setup columns to show in main view
     column_hide_backrefs = False
     column_list = ('user_id', 'email', 'name', 'role',
                    'enrollment')
 
     inline_models = (Enrollment,)
 
+    # Setup fields that can be modified during creation/editing
     form_excluded_columns = ('user_id', 'enrollment')
 
     form_create_rules = ('email', 'name', 'password', 'role')
@@ -32,6 +34,7 @@ class AdminView(ModelView):
         super().__init__(*args, **kwargs)
         self.static_folder = 'static'
 
+    # Only allow an authenticated admin user through
     def is_accessible(self):
         return current_user.is_authenticated and current_user.is_admin()
 
@@ -40,24 +43,32 @@ class AdminView(ModelView):
             return render_template("error/403.html"), 403
 
     def on_model_change(self, form, model, is_created):
+        # Generate new uuid for user_id
         if is_created:
             user_id = uuid.uuid4().hex[:8]
+
+            # Get all existing uuid from db
             exists = db.session.query(User.user_id).filter_by(
                 user_id=user_id).first() is not None
 
+            # Continue generating while non-unique
             while exists:
                 user_id = uuid.uuid4().hex[:8]
 
             model.user_id = user_id
 
+        # Check if any courses are over enrollment
         for e in model.enrollment:
+            # Update course enroll values
             e.course.set_enroll_count()
-            print(f"{e.course.enrolled} {e.course.max_enroll}")
+
+            # Rollback changes made to db and throw exception if course over enrollment
             if e.course.enrolled > e.course.max_enroll:
                 db.session.rollback()
                 raise ValueError(f"Class ({e.course}) above capacity")
         return True
 
+    # Updates the model after changes are done
     def after_model_change(self, form, model, is_created):
         for e in model.enrollment:
             if e is None:
@@ -65,7 +76,6 @@ class AdminView(ModelView):
 
             if e.course:
                 e.course.set_enroll_count()
-                db.session.commit()
 
 
 class CourseView(ModelView):

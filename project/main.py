@@ -128,6 +128,7 @@ def add_course():
     try:
         if course:
             course.add_user(current_user)
+            db.session.commit()
     except Exception as e:
         return "Course full", 409
 
@@ -142,6 +143,7 @@ def remove_course(c_id):
     enrollment = enrollment.first()
     if enrollment:
         enrollment.course.remove_user(current_user)
+        db.session.commit()
         print(f"De-Enrolled student from {c_id}")
         return "Success!", 205
     return "Student not enrolled in course", 404

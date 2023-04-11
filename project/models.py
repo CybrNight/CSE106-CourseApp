@@ -115,7 +115,6 @@ class Course(db.Model):
     def update(self):
         self.set_enroll_count()
         self.set_prof_name()
-        db.session.commit()
 
     def add_user(self, user, grade=-1):
         if grade == -1:
@@ -127,13 +126,11 @@ class Course(db.Model):
         else:
             raise Exception(f"Class {self} full!")
         self.update()
-        db.session.commit()
 
     def remove_user(self, user):
         test = Enrollment.query.filter_by(
             course_id=self.course_id, user_id=user.user_id).delete()
         self.update()
-        db.session.commit()
 
 
 @ event.listens_for(User.password, 'set', retval=True)

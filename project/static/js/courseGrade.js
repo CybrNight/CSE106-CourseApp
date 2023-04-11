@@ -52,6 +52,12 @@ class GradesApp {
         var grades = [];
         for (var i = 1; i < rows.length; i++) {
             const grade = rows[i].cells[1].innerText;
+
+            if (parseInt(grade) < 0 || parseInt(grade) > 100) {
+                alert("Grade value must be between 0 and 100")
+                return;
+            }
+
             const user_id = rows[i].id;
             grades.push({ [user_id]: grade });
         }
@@ -65,6 +71,7 @@ class GradesApp {
         }).then(response => {
             if (response.ok) {
                 console.log("Success");
+                alert("Successfully saved grades data!");
             } else {
                 throw new Error("Error");
             }

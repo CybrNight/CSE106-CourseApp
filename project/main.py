@@ -1,5 +1,6 @@
+from http.client import HTTPException
 from flask import Blueprint, redirect, render_template, request, session
-from flask_login import login_required, current_user
+from flask_login import login_required, fresh_login_required, current_user
 from . import db
 from .models import Course, User, Enrollment
 from flask import jsonify
@@ -8,16 +9,7 @@ from .role import Role
 main = Blueprint('main', __name__)
 
 
-def get_prof_name(course):
-    prof = User.query.join(Enrollment).join(Course).filter(
-        (User.role == Role.PROFESSOR) & (Course.name == course.name)).all()
-    prof_name = ""
-    for p in prof:
-        prof_name += p.name + "\n"
-    return prof_name
-
-
-@main.route('/')
+@ main.route('/')
 def index():
     if (current_user.is_authenticated):
         return render_template('index.html', name=current_user.name)
@@ -26,20 +18,20 @@ def index():
         return render_template('index.html')
 
 
-@main.app_errorhandler(404)
+@ main.app_errorhandler(404)
 def page_not_found(e):
     print(e)
     return render_template('error/404.html'), 404
 
 
-@main.app_errorhandler(403)
+@ main.app_errorhandler(403)
 def forbidden(e):
     print(e)
     return render_template('error/403.html'), 403
 
 
-@main.route('/courses', methods=['GET'])
-@login_required
+@ main.route('/courses', methods=['GET'])
+@fresh_login_required
 def courses():
     if current_user.is_admin():
         return redirect("/admin")
@@ -51,13 +43,14 @@ def courses():
     return render_template('index.html')
 
 
-@main.route('/courses/<c_name>', methods=['GET'])
-@login_required
+@ main.route('/courses/<c_name>', methods=['GET'])
+@fresh_login_required
 def course(c_name):
     return render_template('courseGrades.html', name=current_user.name, course=c_name)
 
 
-@main.route('/courses/<c_name>/students', methods=['GET'])
+@ main.route('/courses/<c_name>/students', methods=['GET'])
+@login_required
 def get_course_students(c_name):
     enrollments = Enrollment.query.join(User).join(Course).filter(
         (User.role == Role.STUDENT) & (Course.name == c_name)).all()
@@ -70,8 +63,8 @@ def get_course_students(c_name):
     return jsonify(output)
 
 
-@main.route('/getCourses', methods=['GET'])
-@login_required
+@ main.route('/getCourses', methods=['GET'])
+@ login_required
 def get_courses():
     classes = Course.query.all()
 
@@ -84,9 +77,7 @@ def get_courses():
             if c == e.course:
                 in_class = True
 
-        prof_name = get_prof_name(c)
-
-        course_data = {'courseName': c.name, 'prof': prof_name,
+        course_data = {'courseId': c.course_id, 'courseName': c.name, 'prof': c.prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll, "in_class": in_class}
         output.append(course_data)
 
@@ -99,9 +90,8 @@ def get_enrolled():
     output = []
     for e in current_user.enrollment:
         c = e.course
-        prof_name = get_prof_name(e.course)
 
-        course_data = {'courseName': c.name, 'prof': prof_name,
+        course_data = {'courseId': c.course_id, 'courseName': c.name, 'prof': c.prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
         output.append(course_data)
     return jsonify(output)
@@ -111,9 +101,8 @@ def get_enrolled():
 @ login_required
 def add_course():
     data = request.json
-
-    c_name = data["courseName"]
-    course = Course.query.filter_by(name=c_name).first()
+    c_id = data['courseId']
+    course = Course.query.filter_by(course_id=c_id).first()
 
     try:
         if course:
@@ -124,17 +113,17 @@ def add_course():
     return "Enrolled student in course", 205
 
 
-@ main.route('/courses/remove/<c_name>', methods=['DELETE'])
+@ main.route('/courses/remove/<c_id>', methods=['DELETE'])
 @ login_required
-def remove_course(c_name):
-
+def remove_course(c_id):
     enrollment = Enrollment.query.join(Course).join(User).filter(
-        ((Course.name == c_name) & (User.name == current_user.name)))
-    course = enrollment.one().course
-    if course:
-        course.remove_user(current_user)
-    print(f"De-Enrolled student from {c_name}")
-    return "Success!", 205
+        ((Course.course_id == c_id) & (User.user_id == current_user.user_id)))
+    enrollment = enrollment.first()
+    if enrollment:
+        enrollment.course.remove_user(current_user)
+        print(f"De-Enrolled student from {c_id}")
+        return "Success!", 205
+    return "Not found", 404
 
 
 @ main.route('/courses/<c_name>/students', methods=['PUT'])

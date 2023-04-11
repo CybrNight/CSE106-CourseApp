@@ -4,5 +4,5 @@ Code for CSE106 course registration app project
 
 ```bash
     pip install -r requirements.txt
-    flask --app project run```
+    flask --app project run
 ```

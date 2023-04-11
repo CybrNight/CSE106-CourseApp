@@ -27,10 +27,11 @@
   <button
     class="tablinks"
     onclick="courseTabs(event, 'CourseGrades')"
-    id="defaultOpen"
+    id="courseGrades"
   >
     {{ course }}
   </button>
+  <button class="tablinks" id="btn-save-grades">Save Grades</button>
 </div>
 <div id="CourseGrades" class="tabcontent">
   <div class="tableFixHead">
@@ -45,6 +46,6 @@
   </div>
 </div>
 <script>
-  document.getElementById("defaultOpen").click();
+  document.getElementById("courseGrades").click();
 </script>
 {% endblock %}

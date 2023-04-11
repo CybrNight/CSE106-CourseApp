@@ -10,8 +10,7 @@ main = Blueprint('main', __name__)
 
 def get_prof_name(course):
     prof = User.query.join(Enrollment).join(Course).filter(
-        (User.role == Role.PROFESSOR) & (Course.course_name == course.course_name)).all()
-    '''prof = enrollment.course.filter(User.role == Role.PROFESSOR).all()'''
+        (User.role == Role.PROFESSOR) & (Course.name == course.name)).all()
     prof_name = ""
     for p in prof:
         prof_name += p.name + "\n"
@@ -52,16 +51,16 @@ def courses():
     return render_template('index.html')
 
 
-@main.route('/courses/<course_name>', methods=['GET'])
+@main.route('/courses/<c_name>', methods=['GET'])
 @login_required
-def course(course_name):
-    return render_template('courseGrades.html', name=current_user.name, course=course_name)
+def course(c_name):
+    return render_template('courseGrades.html', name=current_user.name, course=c_name)
 
 
 @main.route('/courses/<c_name>/students', methods=['GET'])
 def get_course_students(c_name):
     enrollments = Enrollment.query.join(User).join(Course).filter(
-        (User.role == Role.STUDENT) & (Course.course_name == c_name)).all()
+        (User.role == Role.STUDENT) & (Course.name == c_name)).all()
 
     output = []
 
@@ -69,8 +68,7 @@ def get_course_students(c_name):
         grade = {"id": e.user_id, "name": e.user.name, "grade": e.grade}
         output.append(grade)
     return jsonify(output)
-
-
+    
 @main.route('/getCourses', methods=['GET'])
 @login_required
 def get_courses():
@@ -87,7 +85,7 @@ def get_courses():
 
         prof_name = get_prof_name(c)
 
-        course_data = {'courseName': c.course_name, 'prof': prof_name,
+        course_data = {'courseName': c.name, 'prof': prof_name,
                        'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll, "in_class": in_class}
         output.append(course_data)
 
@@ -100,9 +98,8 @@ def get_enrolled():
     output = []
     for e in current_user.enrollment:
         c = e.course
-        prof_name = "TEST"
-        course_data = {'courseName': c.course_name, 'prof': prof_name,
-                       'time': c.time, 'enrolled': c.enrolled, 'maxEnroll': c.max_enroll}
+        prof_name = get_prof_name(e.course)
+        course_data = {'courseName': c.name, 'prof': prof_name,
         output.append(course_data)
     return jsonify(output)
 
@@ -113,14 +110,14 @@ def add_course():
     data = request.json
 
     c_name = data["courseName"]
-    course = Course.query.filter_by(course_name=c_name).first()
+    course = Course.query.filter_by(name=c_name).first()
 
-    if course:
-        if course.enrolled < course.max_enroll:
-            course.enrolled += 1
-            db.session.add(Enrollment(
-                user=current_user, course=course, grade=100))
-            db.session.commit()
+    try:
+        if course:
+            course.add_user(current_user)
+    except Exception as e:
+        return "Course full", 409
+        
     return "Enrolled student in course", 205
 
 
@@ -129,11 +126,23 @@ def add_course():
 def remove_course(c_name):
 
     enrollment = Enrollment.query.join(Course).join(User).filter(
-        ((Course.course_name == c_name) & (User.name == current_user.name)))
+        ((Course.name == c_name) & (User.name == current_user.name)))
     course = enrollment.one().course
     if course:
-        course.enrolled -= 1
-        Enrollment.query.filter_by(course=course).delete()
-        db.session.commit()
+        course.remove_user(current_user)
     print(f"De-Enrolled student from {c_name}")
+    return "Success!", 205
+
+
+@ main.route('/courses/<c_name>/students', methods=['PUT'])
+@ login_required
+def update_grades(c_name):
+    data = request.json
+
+    for user in data:
+        for key, value in user.items():
+            user = Enrollment.query.join(Course).join(User).filter(
+                (User.role == Role.STUDENT) & (User.user_id == key) & (Course.name == c_name)).first()
+            user.grade = value
+    db.session.commit()
     return "Success!", 205

@@ -34,22 +34,54 @@ class GradesApp {
                 const row = This.gradesTable.insertRow();
                 const studentsCell = row.insertCell();
                 const gradeCell = row.insertCell();
+                gradeCell.setAttribute('contenteditable', 'true')
+
 
                 //Set the cell values to the name (key) and grade (json[key])
                 studentsCell.innerText = student.name;
                 gradeCell.innerText = student.grade;
+                row.id = student.id;
             });
         } else {
             throw new InternalError(`${response.status}:${await response.text()}`);
         }
     }
+
+    async saveGrades() {
+        var rows = this.gradesTable.rows;
+        var grades = [];
+        for (var i = 1; i < rows.length; i++) {
+            const grade = rows[i].cells[1].innerText;
+            const user_id = rows[i].id;
+            grades.push({ [user_id]: grade });
+        }
+        console.log(grades);
+        fetch(`/courses/${course}/students`, {
+            method: 'PUT',
+            body: JSON.stringify(grades),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                console.log("Success");
+            } else {
+                throw new Error("Error");
+            }
+        }).catch(error => {
+            console.log(error);
+        });
+    }
 }
 window.onload = function () {
     const gradesTable = document.getElementById('grades-table');
+    const btnSaveGrades = document.getElementById('btn-save-grades');
 
     c = new GradesApp(gradesTable);
 
-    c.showAllGrades();
+    btnSaveGrades.addEventListener('click', button => {
+        c.saveGrades();
+    });
 }
 
 function courseTabs(event, tabAction) {
@@ -75,3 +107,5 @@ function courseTabs(event, tabAction) {
 function goBack() {
     window.location.href = "/courses";
 }
+
+//post grades to database using @ main.route('/courses/<c_name>/students', methods=['POST']

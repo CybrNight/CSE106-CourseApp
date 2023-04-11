@@ -81,15 +81,15 @@ function goBack() {
 function saveGrades() {
     var table = document.getElementById("grades-table");
     var rows = table.rows;
-    var grades = [];
+    var gradesList = [];
     for (var i = 1; i < rows.length; i++) {
         var grade = rows[i].cells[1].innerHTML;
-        grades.push(grade);
+        gradesList.push(grade);
     }
     var data = {
-        grades: grades
+        grades: gradesList
     }
-    console.log(data);
+    console.log(data)
     fetch(`/courses/${course}/students`, {
         method: 'PUT',
         body: JSON.stringify(data),

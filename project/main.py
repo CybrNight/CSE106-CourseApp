@@ -142,14 +142,11 @@ def remove_course(c_name):
 @ login_required
 def update_grades(c_name):
     data = request.json
-    enrollment = Enrollment.query.join(Course).join(User).filter(
+    enrollment = Enrollment.query.join(User).join(Course).filter(
         (User.role == Role.STUDENT) & (Course.course_name == c_name)).all()
-
     print(data)
     for e in enrollment:
-        for d in data:
-                #e.grade = data[grade]
-                db.session.commit()
+        e.grade = data["grades"][enrollment.index(e)]
 
     db.session.commit()
     return "Success!", 205

@@ -13,6 +13,8 @@ class Enrollment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
         "user.user_id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        "user.user_id"), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey(
         "course.id"), nullable=False)
 
@@ -25,6 +27,7 @@ class Enrollment(db.Model):
 
     def __repr__(self):
         return self.course.name + " " + self.user.name
+        return self.course.name + " " + self.user.name
 
 
 class User(UserMixin, db.Model):
@@ -35,8 +38,8 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(1000))
     user_id = db.Column(db.String, unique=True)
     role = db.Column(db.Enum(Role))
-    courses = db.relationship(
-        'Course', secondary=enrollment, backref=db.backref('users', lazy='dynamic'))
+    enrollment = db.relationship(
+        "Enrollment", back_populates="user", lazy="joined")
 
     def is_admin(self):
         return self.role == Role.ADMIN
@@ -53,6 +56,24 @@ class Course(db.Model):
     max_enroll = db.Column(db.Integer)
 
     def __repr__(self):
+        return self.name
+
+    def set_enroll_count(self):
+        enrollment = Enrollment.query.join(Course).join(User).filter(
+            (User.role == Role.STUDENT) & (Course.name == self.name)).all()
+        self.enrolled = len(enrollment)
+        return self.enrolled
+
+    def add_user(self, user):
+        if self.enrolled < self.max_enroll:
+            db.session.add(Enrollment(user=user, course=self, grade=100))
+            self.set_enroll_count()
+            db.session.commit()
+
+    def remove_user(self, user):
+        Enrollment.query.filter_by(course=self, user=user).delete()
+        self.set_enroll_count()
+        db.session.commit()
         return self.name
 
     def set_enroll_count(self):

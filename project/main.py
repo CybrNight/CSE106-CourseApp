@@ -50,7 +50,7 @@ def course(c_id):
     prof = User.query.join(Enrollment).join(Course).filter(
         (User.role == Role.PROFESSOR) & (Course.course_id == c_id)).first()
 
-    if not prof.user_id == current_user.user_id:
+    if not prof or not prof.user_id == current_user.user_id:
         abort(403)
 
     if course:

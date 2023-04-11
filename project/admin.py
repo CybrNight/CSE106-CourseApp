@@ -58,20 +58,6 @@ class AdminView(ModelView):
                 raise ValueError(f"Class ({e.course}) above capacity")
         return True
 
-        """model.enrollment[0].course.update()
-        print(model.course[0].enrolled)
-        raise ValueError(
-            f"Class ({model.course[0]}) above capacity")
-        for e in model.enrollment:
-            if e is None:
-                continue
-
-            course = e.course
-            course.update()
-
-            if course.enrolled >= course.max_enroll:
-                db.session.rollback()"""
-
     def after_model_change(self, form, model, is_created):
         for e in model.enrollment:
             if e is None:

@@ -49,7 +49,7 @@ class CourseApp {
                 if (course.enrolled < course.maxEnroll) {
                     if (!in_class) {
                         btn.onmouseup = async () => {
-                            await this.addCourse(course.courseName);
+                            await this.addCourse(course.courseId);
                         };
                         btn.className = "fa-sharp fa-solid fa-plus";
                         addCell.appendChild(btn);
@@ -116,7 +116,8 @@ class CourseApp {
                 //Add remove course button
                 const btn = document.createElement('button');
                 btn.onmouseup = async () => {
-                    await this.removeCourse(course.courseName);
+                    console.log(course.id)
+                    await this.removeCourse(course.courseId);
                 };
                 btn.innerHTML = "<i></i>";
                 btn.className = "fa-sharp fa-solid fa-minus";
@@ -127,13 +128,13 @@ class CourseApp {
         }
     }
 
-    async addCourse(courseName) {
+    async addCourse(courseId) {
         let response = await fetch('/courses/add', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ "courseName": courseName })
+            body: JSON.stringify({ "courseId": courseId })
         });
         if (response.ok) {
             await this.getEnrolledTable();
@@ -144,17 +145,17 @@ class CourseApp {
 
     }
 
-    async removeCourse(courseName) {
-        let response = await fetch(`/courses/remove/${courseName.replaceAll(" ", "%20")}`, {
+    async removeCourse(courseId) {
+        let response = await fetch(`/courses/remove/${courseId}`, {
             method: "DELETE",
-            body: JSON.stringify({ "courseName": courseName })
+            body: JSON.stringify({ "courseId": courseId })
         });
         if (response.ok) {
             await this.getEnrolledTable();
             await this.getCourseTable();
         } else {
             if (response.status === 404) {
-                throw new Error("Student not enrolled in course " + courseName);
+                throw new Error("Student not enrolled in course " + courseId);
             }
             throw InternalError("Unexpected response" + response.status);
         }

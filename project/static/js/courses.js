@@ -46,7 +46,7 @@ class CourseApp {
                 const in_class = course.in_class;
 
                 const btn = document.createElement('button');
-                if (!course.full) {
+                if (course.enrolled < course.maxEnroll) {
                     if (!in_class) {
                         btn.onmouseup = async () => {
                             await this.addCourse(course.courseId);

@@ -42,29 +42,23 @@ def signup():
     if request.method == 'GET':
         return render_template('signup.html')
     elif request.method == 'POST':
-        # code to validate and add user to database goes here
+        # Get user input
         email = request.form.get('email')
         name = request.form.get('name')
         password = request.form.get('password')
 
-        # if this returns a user, then the email already exists in database
+        # If user is found, already in db
         user = User.query.filter_by(email=email).first()
 
-        if user:  # if a user is found, we want to redirect back to signup page so user can try again
+        if user:  # Flash error is user already exists
             flash('Email address already exists')
             return redirect(url_for('auth.signup'))
 
-        user_id = uuid.uuid4().hex[:8]
-        exists = db.session.query(User.user_id).filter_by(
-            user_id=user_id).first() is not None
-
-        while exists:
-            user_id = uuid.uuid4().hex[:8]
-        # create a new user with the form data. Hash the password so the plaintext version isn't saved.
+        # Create new user object, password hashing handled in models.py
         new_user = User(email=email, name=name,
-                        password=password, user_id=user_id)
+                        password=password)
 
-        # add the new user to the database
+        # Add user to db
         db.session.add(new_user)
         db.session.commit()
 

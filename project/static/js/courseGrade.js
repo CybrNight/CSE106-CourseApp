@@ -6,7 +6,8 @@ class GradesApp {
 
     async showAllGrades() {
         const This = this;
-        let response = await fetch(`/courses/${course}/students`, {
+        console.log(course)
+        let response = await fetch(`/courses/${courseId}/students`, {
             method: "GET"
         });
         if (response.ok) {
@@ -52,11 +53,17 @@ class GradesApp {
         var grades = [];
         for (var i = 1; i < rows.length; i++) {
             const grade = rows[i].cells[1].innerText;
+
+            if (parseInt(grade) < 0 || parseInt(grade) > 100) {
+                alert("Grade value must be between 0 and 100")
+                return;
+            }
+
             const user_id = rows[i].id;
             grades.push({ [user_id]: grade });
         }
         console.log(grades);
-        fetch(`/courses/${course}/students`, {
+        fetch(`/courses/${courseId}/students`, {
             method: 'PUT',
             body: JSON.stringify(grades),
             headers: {
@@ -65,6 +72,7 @@ class GradesApp {
         }).then(response => {
             if (response.ok) {
                 console.log("Success");
+                alert("Successfully saved grades data!");
             } else {
                 throw new Error("Error");
             }

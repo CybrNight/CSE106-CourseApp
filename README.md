@@ -2,7 +2,7 @@
 
 Code for CSE106 course registration app project
 
-````bash
+```bash
     pip install -r requirements.txt
     flask --app project run```
-````
+```

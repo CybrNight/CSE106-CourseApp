@@ -56,10 +56,6 @@ def course(c_id):
     prof = User.query.join(Enrollment).join(Course).filter(
         (User.role == Role.PROFESSOR) & (Course.course_id == c_id)).all()
 
-    # If the professor can't be found, we didn't hit a course
-    if len(prof) == 0:
-        abort(404)
-
     # If ID mismatch we are not allowed to be here
     access = False
     for p in prof:
@@ -67,8 +63,8 @@ def course(c_id):
         if p.user_id == current_user.user_id:
             access = True
 
-    if not access:
-        abort(403)
+    if not access or len(prof) == 0:
+        return redirect(url_for("main.courses"))
 
     # If prof then can view student roster
     if course:
@@ -84,7 +80,7 @@ def get_course_students(c_id):
         (User.role == Role.STUDENT) & (Course.course_id == c_id)).all()
 
     if len(enrollments) == 0:
-        abort(404)
+        return redirect(url_for("main.courses"))
 
     output = []
     for e in enrollments:

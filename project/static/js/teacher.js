@@ -7,7 +7,7 @@ class CourseApp {
 
     async getTeacherTable() {
         const This = this;
-        let response = await fetch("/getCourses", {
+        let response = await fetch("/getEnrolled", {
             method: "GET"
         });
         if (response.ok) {
@@ -33,7 +33,7 @@ class CourseApp {
                 //Insert row and two cells
                 //check if course.prof is the same as the logged in user
                 console.log(course)
-                if (course.in_class) {
+                if (true) {
                     var row = This.teacherTable.insertRow();
                     var courseNameCell = row.insertCell();
                     var timeCell = row.insertCell();

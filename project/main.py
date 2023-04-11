@@ -1,5 +1,5 @@
 from http.client import HTTPException
-from flask import Blueprint, redirect, render_template, request, session
+from flask import Blueprint, abort, redirect, render_template, request, session
 from flask_login import login_required, fresh_login_required, current_user
 from . import db
 from .models import Course, User, Enrollment
@@ -12,7 +12,7 @@ main = Blueprint('main', __name__)
 @ main.route('/')
 def index():
     if (current_user.is_authenticated):
-        return render_template('index.html', name=current_user.name)
+        return render_template('index.html')
     else:
 
         return render_template('index.html')
@@ -31,7 +31,7 @@ def forbidden(e):
 
 
 @ main.route('/courses', methods=['GET'])
-@fresh_login_required
+@login_required
 def courses():
     if current_user.is_admin():
         return redirect("/admin")
@@ -44,10 +44,18 @@ def courses():
 
 
 @ main.route('/courses/<c_id>', methods=['GET'])
-@fresh_login_required
+@login_required
 def course(c_id):
     course = Course.query.filter_by(course_id=c_id).first()
-    return render_template('courseGrades.html', name=current_user.name, c_id=c_id, course=course.name)
+    prof = User.query.join(Enrollment).join(Course).filter(
+        (User.role == Role.PROFESSOR) & (Course.course_id == c_id)).first()
+
+    if not prof.user_id == current_user.user_id:
+        abort(403)
+
+    if course:
+        return render_template('courseGrades.html', c_id=c_id, course=course.name)
+    abort(404)
 
 
 @ main.route('/courses/<c_id>/students', methods=['GET'])
@@ -56,11 +64,16 @@ def get_course_students(c_id):
     enrollments = Enrollment.query.join(User).join(Course).filter(
         (User.role == Role.STUDENT) & (Course.course_id == c_id)).all()
 
-    output = []
+    if len(enrollments) == 0:
+        abort(404)
 
+    output = []
     for e in enrollments:
-        grade = {"id": e.user_id, "name": e.user.name, "grade": e.grade}
-        output.append(grade)
+        if e.user is None:
+            continue
+
+        user = {"id": e.user_id, "name": e.user.name, "grade": e.grade}
+        output.append(user)
     return jsonify(output)
 
 
@@ -89,6 +102,10 @@ def get_courses():
 @ login_required
 def get_enrolled():
     output = []
+
+    if len(current_user.enrollment) == 0:
+        return {}, 200
+
     for e in current_user.enrollment:
         c = e.course
 
@@ -124,7 +141,7 @@ def remove_course(c_id):
         enrollment.course.remove_user(current_user)
         print(f"De-Enrolled student from {c_id}")
         return "Success!", 205
-    return "Not found", 404
+    return "Student not enrolled in course", 404
 
 
 @ main.route('/courses/<c_id>/students', methods=['PUT'])
@@ -136,7 +153,10 @@ def update_grades(c_id):
         for key, value in user.items():
             user = Enrollment.query.join(Course).join(User).filter(
                 (User.role == Role.STUDENT) & (User.user_id == key) & (Course.course_id == c_id)).first()
-            print(c_id)
+
+            if not user:
+                abort(404)
+
             user.grade = value
     db.session.commit()
     return "Success!", 205

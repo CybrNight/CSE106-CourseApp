@@ -15,10 +15,9 @@ class AdminView(ModelView):
 
     inline_models = (Enrollment,)
 
-    form_excluded_columns = ('user_id')
+    form_excluded_columns = ('user_id', 'enrollment')
 
-    form_create_rules = ('email', 'name', 'password', 'role',
-                         'enrollment')
+    form_create_rules = ('email', 'name', 'password', 'role')
 
     form_edit_rules = ('email', 'name', 'password', 'role',
                        'enrollment')
@@ -41,9 +40,6 @@ class AdminView(ModelView):
             return render_template("error/403.html"), 403
 
     def on_model_change(self, form, model, is_created):
-        for e in model.enrollment:
-            e.course.set_enroll_count()
-
         if is_created:
             user_id = uuid.uuid4().hex[:8]
             exists = db.session.query(User.user_id).filter_by(
@@ -54,7 +50,36 @@ class AdminView(ModelView):
 
             model.user_id = user_id
 
-        db.session.commit()
+        for e in model.enrollment:
+            e.course.set_enroll_count()
+            print(f"{e.course.enrolled} {e.course.max_enroll}")
+            if e.course.enrolled > e.course.max_enroll:
+                db.session.rollback()
+                raise ValueError(f"Class ({e.course}) above capacity")
+        return True
+
+        """model.enrollment[0].course.update()
+        print(model.course[0].enrolled)
+        raise ValueError(
+            f"Class ({model.course[0]}) above capacity")
+        for e in model.enrollment:
+            if e is None:
+                continue
+
+            course = e.course
+            course.update()
+
+            if course.enrolled >= course.max_enroll:
+                db.session.rollback()"""
+
+    def after_model_change(self, form, model, is_created):
+        for e in model.enrollment:
+            if e is None:
+                continue
+
+            if e.course:
+                e.course.set_enroll_count()
+                db.session.commit()
 
 
 class CourseView(ModelView):
@@ -64,10 +89,10 @@ class CourseView(ModelView):
 
     inline_models = (Enrollment,)
 
-    form_excluded_columns = ('course_id')
+    form_excluded_columns = ('course_id', 'enrollment')
 
-    form_create_rules = ('name', 'prof_name', 'time', 'enrolled',
-                         'max_enroll', 'enrollment')
+    form_create_rules = ('name', 'time',
+                         'max_enroll')
     form_edit_rules = ('name', 'prof_name', 'time', 'enrolled',
                        'max_enroll', 'enrollment')
 
@@ -92,18 +117,14 @@ class CourseView(ModelView):
 
             while exists:
                 course_id = uuid.uuid4().hex[:8]
-            print(course_id)
+
             model.course_id = course_id
-        model.update()
-        try:
-            if model.enrolled > model.max_enroll:
-                raise ValueError(f"Class ({model.name}) above capacity")
-            return True
-        except Exception as e:
-            if not self.handle_view_exception(e):
-                raise
+        model.set_enroll_count()
+        if model.enrolled > model.max_enroll:
             db.session.rollback()
-            return False
+            raise ValueError(f"Class ({model.name}) above capacity")
+
+        return True
 
     def after_model_change(self, form, model, is_created):
         model.update()

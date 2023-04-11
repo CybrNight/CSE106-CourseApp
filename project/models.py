@@ -50,16 +50,6 @@ class User(UserMixin, db.Model):
         self.email = email
         self.password = password
         self.role = role
-
-        if self.email == "default":
-            names = name.split(" ")
-
-            if len(names) >= 2:
-                self.email = (names[0][0] + names[1]).lower()
-            else:
-                self.email = self.name.lower()
-            self.email += "@me.com"
-
         user_id = uuid.uuid4().hex[:8]
         exists = db.session.query(User.user_id).filter_by(
             user_id=user_id).first() is not None
@@ -69,7 +59,14 @@ class User(UserMixin, db.Model):
 
         self.user_id = user_id
 
-        db.session.commit()
+        if self.email == "default":
+            names = name.split(" ")
+
+            if len(names) >= 2:
+                self.email = (names[0][0] + names[1]).lower()
+            else:
+                self.email = self.name.lower()
+            self.email += "@me.com"
 
 
 class Course(db.Model):
@@ -89,7 +86,6 @@ class Course(db.Model):
         self.enrolled = 0
         self.prof_name = "NULL"
         self.max_enroll = max_enroll
-        self.course_id = "default"
 
         course_id = uuid.uuid4().hex[:8]
         exists = db.session.query(Course.course_id).filter_by(
@@ -99,7 +95,6 @@ class Course(db.Model):
             course_id = uuid.uuid4().hex[:8]
 
         self.course_id = course_id
-
         db.session.commit()
 
     def __repr__(self):
@@ -123,6 +118,8 @@ class Course(db.Model):
         db.session.commit()
 
     def add_user(self, user, grade=-1):
+        if grade == -1:
+            grade = randint(0, 100)
         if self.enrolled < self.max_enroll:
             db.session.add(Enrollment(user=user, course=self, grade=grade))
             if (user.role == Role.PROFESSOR):
@@ -130,11 +127,13 @@ class Course(db.Model):
         else:
             raise Exception(f"Class {self} full!")
         self.update()
+        db.session.commit()
 
     def remove_user(self, user):
         test = Enrollment.query.filter_by(
             course_id=self.course_id, user_id=user.user_id).delete()
         self.update()
+        db.session.commit()
 
 
 @ event.listens_for(User.password, 'set', retval=True)
